@@ -729,3 +729,34 @@ body { overflow-x: clip; }
   .work--entrance { --h: 44svh; }
 }
 @media (hover: none) { .vl-back kbd { display: none; } }
+
+/* ---------------------------------------------------------------------
+   歩く（script.js の initWalk が html に .walk を付けたときだけ）
+   --------------------------------------------------------------------- */
+.walk .work { transform-origin: 50% 55%; }
+.walk .sign-name { will-change: transform; }
+.walk .passage-door { transform-origin: 50% 100%; transition: border-color .6s; }
+.walk .passage-text { transform-origin: 50% 50%; }
+
+/* 入口の床：歩いた分だけ床板の継ぎ目が手前へ流れる */
+.floor::before {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 236px, rgba(var(--shadow-rgb), .22) 236px 238px) 0 calc(var(--walk, 0) * 1px),
+    repeating-linear-gradient(90deg, var(--floor-1) 0 58px, var(--floor-2) 58px 60px, color-mix(in srgb, var(--floor-1) 85%, var(--floor-2)) 60px 118px, var(--floor-2) 118px 120px);
+}
+.walk .entrance-wall { transform-origin: 50% 40%; }
+
+/* 回廊：縦スクロールで横に歩く。舞台を画面に固定し、作品の列を横に送る */
+.walk .wall--corridor { padding: 0; }
+.walk .corridor-stage {
+  position: sticky; top: var(--header);
+  height: calc(100svh - var(--header));
+  display: flex; flex-direction: column; justify-content: center;
+  overflow: hidden;
+}
+.walk .corridor-track { overflow: visible; scroll-snap-type: none; will-change: transform; }
+.walk .corridor-hint::after { content: "（スクロールで進む）"; margin-left: .4em; }
+.corridor-progress { display: none; width: min(160px, 30vw); height: 1px; background: var(--rule); position: relative; }
+.corridor-progress span { position: absolute; inset: 0; background: var(--ink); transform-origin: left; transform: scaleX(0); }
+.walk .corridor-progress { display: block; }
+@media (max-width: 760px) { .walk .corridor-hint { display: none; } }

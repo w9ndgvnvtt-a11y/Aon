@@ -253,13 +253,16 @@ const PLACES = {
     },
     corridor(g) {
       return `<div class="wall wall--corridor">
-        <div class="corridor-track" tabindex="0" aria-label="${esc(g.name)} の回廊（横にスクロール）">
-          ${g.works.map((no) => artwork(no, g.frame, { cls: "work--wide" })).join("")}
-        </div>
-        <div class="corridor-guide">
-          <button type="button" class="corridor-step" data-dir="-1" aria-label="回廊を戻る">←</button>
-          <span>回廊を横に歩く</span>
-          <button type="button" class="corridor-step" data-dir="1" aria-label="回廊を進む">→</button>
+        <div class="corridor-stage">
+          <div class="corridor-track" tabindex="0" aria-label="${esc(g.name)} の回廊（横にスクロール）">
+            ${g.works.map((no) => artwork(no, g.frame, { cls: "work--wide" })).join("")}
+          </div>
+          <div class="corridor-guide">
+            <button type="button" class="corridor-step" data-dir="-1" aria-label="回廊を戻る">←</button>
+            <span class="corridor-hint">回廊を横に歩く</span>
+            <span class="corridor-progress" aria-hidden="true"><span></span></span>
+            <button type="button" class="corridor-step" data-dir="1" aria-label="回廊を進む">→</button>
+          </div>
         </div>
       </div>`;
     },
@@ -303,8 +306,15 @@ const PLACES = {
 
     // 回廊の送り
     $$(".corridor-step").forEach((b) => b.addEventListener("click", () => {
-      const track = b.closest(".wall--corridor").querySelector(".corridor-track");
-      track.scrollBy({ left: Number(b.dataset.dir) * track.clientWidth * 0.8, behavior: reduceMotion ? "auto" : "smooth" });
+      const wall = b.closest(".wall--corridor");
+      const track = wall.querySelector(".corridor-track");
+      const dir = Number(b.dataset.dir);
+      if (document.documentElement.classList.contains("walk")) {
+        const n = track.querySelectorAll(".work").length || 1;
+        window.scrollBy({ top: dir * (wall._dist || track.clientWidth) / (n - 1 || 1), behavior: "smooth" });
+      } else {
+        track.scrollBy({ left: dir * track.clientWidth * 0.8, behavior: reduceMotion ? "auto" : "smooth" });
+      }
     }));
   }
 
@@ -696,6 +706,7 @@ const PLACES = {
 
   /* ---------------- 館内環境音（ONにしたときだけ） ---------------- */
   let audio = null;
+  let soundOn = false;
   function startAmbience() {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return null;
@@ -720,7 +731,27 @@ const PLACES = {
     else { audio.gain.gain.cancelScheduledValues(audio.ctx.currentTime); audio.gain.gain.linearRampToValueAtTime(0, audio.ctx.currentTime + 0.8); }
     btn.setAttribute("aria-pressed", String(on));
     $("#sound-state").textContent = on ? "ON" : "OFF";
+    soundOn = on;
   });
+
+  // 足音（SOUND が ON のときだけ）。短く低いノイズを、床の硬さくらいに絞る
+  let stepBuf = null;
+  function playStep(strength) {
+    if (!soundOn || !audio) return;
+    const ctx = audio.ctx;
+    if (!stepBuf) {
+      const len = Math.floor(ctx.sampleRate * 0.14);
+      stepBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const d = stepBuf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    }
+    const src = ctx.createBufferSource(); src.buffer = stepBuf;
+    src.playbackRate.value = 0.85 + Math.random() * 0.3;
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 170 + Math.random() * 60; bp.Q.value = 0.9;
+    const g = ctx.createGain(); g.gain.value = 0.35 * strength;
+    src.connect(bp).connect(g).connect(ctx.destination);
+    src.start();
+  }
 
   /* ---------------- 受付 ---------------- */
   const emailEl = $("#email");
@@ -737,6 +768,131 @@ const PLACES = {
     if (navigator.clipboard) navigator.clipboard.writeText(MUSEUM.email).then(done, fallback); else fallback();
   });
 
+  /* ---------------- 歩く（スクロールに合わせて館内が動く） ----------------
+     ・作品：遠くでは小さく傾き、正面に来るとまっすぐ大きくなり、通り過ぎると上へ抜ける
+     ・視線：歩くたびに、ごくわずかに上下左右に揺れる（止まると静まる）
+     ・床：歩いた分だけ床板が流れる
+     ・通路：扉に近づくと扉が大きくなり、くぐり抜ける
+     ・回廊（横長の部屋）：下へスクロールすると横へ歩く
+     「動きを減らす」設定の端末では何もしません。 */
+  function initWalk() {
+    if (reduceMotion) return;
+    root.classList.add("walk");
+    const museumEl = $("#museum");
+    const header = () => $("#signage").getBoundingClientRect().height;
+    const STEP = 360; // 一歩ぶんのスクロール量（px）
+
+    const works = $$(".work").filter((w) => !w.closest(".wall--corridor") && !w.closest(".entrance"));
+    const signs = $$(".room-sign .sign-name");
+    const passages = $$(".passage");
+    const corridors = $$(".wall--corridor");
+    const floors = $$(".baseboard");
+    const entFloor = $(".entrance .floor");
+    const entWall = $(".entrance-wall");
+    const ceiling = $(".entrance .ceiling");
+    const entrance = $("#entrance");
+
+    // 回廊の長さは作品の幅で決まるので、回廊の写真だけは先に読み込んでおく
+    corridors.forEach((c) => $$("img", c).forEach((img) => (img.loading = "eager")));
+
+    let cache = [];
+    function measure() {
+      const sy = window.scrollY;
+      [...works, ...signs].forEach((el) => (el.style.transform = ""));
+      corridors.forEach((c) => {
+        const track = $(".corridor-track", c);
+        track.style.transform = "";
+        const last = track.lastElementChild;
+        const pad = parseFloat(getComputedStyle(track).paddingRight) || 0;
+        const dist = last ? Math.max(0, last.offsetLeft + last.offsetWidth + pad - track.clientWidth) : 0;
+        c._dist = dist;
+        c.style.height = `calc(${dist}px + 100svh)`;
+      });
+      const at = (el) => { const r = el.getBoundingClientRect(); return { el, top: r.top + sy, h: r.height }; };
+      cache = {
+        works: works.map(at),
+        signs: signs.map(at),
+        passages: passages.map(at),
+        corridors: corridors.map(at),
+        entranceH: entrance.offsetHeight,
+      };
+      frame(true);
+    }
+
+    let lastY = window.scrollY, activity = 0, lastStep = Math.floor(lastY / (STEP / 2)), running = false;
+    const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+    function frame(force) {
+      const sy = window.scrollY, vh = window.innerHeight, vc = sy + vh / 2;
+      const v = sy - lastY; lastY = sy;
+      activity += (Math.min(1, Math.abs(v) / 12) - activity) * 0.12;
+
+      // 視線の揺れ（歩行のリズム）
+      const phase = sy / STEP;
+      const bob = Math.sin(phase * Math.PI * 2) * 3.2 * activity;
+      const sway = Math.sin(phase * Math.PI) * 1.6 * activity;
+      museumEl.style.transform = activity > 0.01 ? `translate3d(${sway.toFixed(2)}px, ${bob.toFixed(2)}px, 0)` : "";
+
+      // 足音：半歩ごと
+      const half = Math.floor(sy / (STEP / 2));
+      if (half !== lastStep) { if (activity > 0.2) playStep(Math.min(1, activity)); lastStep = half; }
+
+      // 作品に近づき、通り過ぎる
+      for (const it of cache.works) {
+        const d = (it.top + it.h / 2 - vc) / vh;
+        if (Math.abs(d) > 1.4 && !force) continue;
+        const a = clamp(d, -1.2, 1.2);
+        const s = 1 - 0.1 * Math.min(1, a * a * 1.6);
+        it.el.style.transform = `perspective(1400px) translate3d(0, ${(-a * 46).toFixed(1)}px, ${(-Math.abs(a) * 60).toFixed(1)}px) rotateX(${(a * 7).toFixed(2)}deg) scale(${s.toFixed(4)})`;
+      }
+      // 部屋の名前：歩くと横に流れていく
+      for (const it of cache.signs) {
+        const d = (it.top + it.h / 2 - vc) / vh;
+        if (Math.abs(d) > 1.5 && !force) continue;
+        it.el.style.transform = `translate3d(${(clamp(d, -1.5, 1.5) * 70).toFixed(1)}px, 0, 0)`;
+      }
+      // 通路：扉が近づいてきて、くぐる
+      for (const it of cache.passages) {
+        const p = clamp((sy + vh - it.top) / (it.h + vh), 0, 1);
+        const door = $(".passage-door", it.el), text = $(".passage-text", it.el);
+        const k = Math.max(0, p - 0.25) / 0.75;
+        door.style.transform = `translateX(-50%) scale(${(1 + k * k * 5.5).toFixed(3)})`;
+        door.style.opacity = (1 - Math.max(0, k - 0.7) / 0.3).toFixed(3);
+        text.style.transform = `scale(${(1 + k * 0.25).toFixed(3)})`;
+        text.style.opacity = (1 - Math.max(0, k - 0.45) / 0.35).toFixed(3);
+      }
+      // 回廊：縦に歩くと、横へ進む
+      const hh = header();
+      for (const it of cache.corridors) {
+        const dist = it.el._dist || 0;
+        const q = dist ? clamp((sy + hh - it.top) / dist, 0, 1) : 0;
+        $(".corridor-track", it.el).style.transform = `translate3d(${(-q * dist).toFixed(1)}px, 0, 0)`;
+        $(".corridor-progress span", it.el).style.transform = `scaleX(${q.toFixed(4)})`;
+      }
+      // 床板
+      floors.forEach((f) => (f.style.backgroundPositionX = `${(-sy * 0.55).toFixed(1)}px`));
+      // 入口：奥へ歩いて入っていく
+      if (sy < cache.entranceH * 1.2 || force) {
+        const e = clamp(sy / (cache.entranceH * 0.85), 0, 1);
+        entWall.style.transform = `translate3d(0, ${(e * 40).toFixed(1)}px, 0) scale(${(1 + e * 0.16).toFixed(4)})`;
+        ceiling.style.transform = `translate3d(0, ${(-e * 70).toFixed(1)}px, 0)`;
+        if (entFloor) entFloor.style.setProperty("--walk", (sy * 1.4).toFixed(1));
+      }
+
+      if (activity > 0.005 || Math.abs(v) > 0.5) requestAnimationFrame(() => frame(false));
+      else { running = false; museumEl.style.transform = ""; }
+    }
+    function kick() { if (!running) { running = true; requestAnimationFrame(() => frame(false)); } }
+
+    window.addEventListener("scroll", kick, { passive: true });
+    let rt = null;
+    const remeasure = () => { clearTimeout(rt); rt = setTimeout(measure, 120); };
+    window.addEventListener("resize", remeasure);
+    window.addEventListener("load", remeasure);
+    $$("#museum img").forEach((img) => { if (!img.complete) img.addEventListener("load", remeasure, { once: true }); });
+    measure();
+  }
+
   /* ---------------- 起動 ---------------- */
   renderGalleries();
   renderCatalogue();
@@ -748,6 +904,7 @@ const PLACES = {
   setInterval(applyHours, 60000);
   watchLights();
   watchSpaces();
+  initWalk();
   updateMapHere("entrance");
 
   const initial = location.hash.slice(1);
