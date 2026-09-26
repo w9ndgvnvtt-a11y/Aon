@@ -2,149 +2,203 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AON — Photography</title>
-  <meta name="description" content="写真家 AON のポートフォリオ。ポートレート、風景、ストリート、コマーシャル撮影。">
-  <meta property="og:title" content="AON — Photography">
-  <meta property="og:description" content="写真家 AON のポートフォリオサイト">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AON 写真収蔵館</title>
+  <meta name="description" content="写真家 AON の写真作品を収蔵・展示する、小さなオンライン博物館。">
+  <meta property="og:title" content="AON 写真収蔵館 — AON Photograph Museum">
+  <meta property="og:description" content="写真家 AON の写真作品を収蔵・展示する、小さなオンライン博物館。">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="images/works/work-01.svg">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect x=%2210%22 y=%228%22 width=%2244%22 height=%2248%22 fill=%22%23f1efea%22 stroke=%22%231b1b1a%22 stroke-width=%224%22/%3E%3Crect x=%2220%22 y=%2218%22 width=%2224%22 height=%2228%22 fill=%22%231b1b1a%22/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Ccircle cx=%2232%22 cy=%2232%22 r=%2228%22 fill=%22none%22 stroke=%22%238a6d4b%22 stroke-width=%224%22/%3E%3Ccircle cx=%2232%22 cy=%2232%22 r=%2210%22 fill=%22%238a6d4b%22/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..700&family=IBM+Plex+Mono:wght@400;500&family=Shippori+Mincho:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="site-header" id="top">
-    <a class="logo" href="#top">AON<span>Photography</span></a>
-    <button class="nav-toggle" aria-label="メニューを開く" aria-expanded="false" aria-controls="nav">
-      <span></span><span></span>
-    </button>
-    <nav class="nav" id="nav">
-      <a href="#works">Works</a>
-      <a href="#about">About</a>
-      <a href="#services">Services</a>
-      <a href="#contact">Contact</a>
-    </nav>
+  <a class="skip" href="#central-hall">展示室へ進む</a>
+
+  <!-- 館内サイン（固定ヘッダー） -->
+  <header class="signage" id="signage">
+    <a class="signage-name" href="#entrance" data-goto="entrance">
+      <span class="signage-mark" aria-hidden="true"></span>
+      <span>AON<span class="signage-sub"> 写真収蔵館</span></span>
+    </a>
+    <p class="signage-here" aria-live="polite">
+      <span class="here-label">現在地</span>
+      <span class="here-value" id="here">ENTRANCE</span>
+    </p>
+    <div class="signage-tools">
+      <button class="tool tool-hours" id="hours-btn" type="button" aria-pressed="false" title="館内照明を切り替える">
+        <span class="hours-dot" aria-hidden="true"></span><span id="hours-text">OPEN</span>
+      </button>
+      <button class="tool" id="sound-btn" type="button" aria-pressed="false" title="館内環境音（初期状態はOFF）">SOUND <span id="sound-state">OFF</span></button>
+      <button class="tool tool-map" id="map-btn" type="button" aria-haspopup="dialog" aria-controls="map">MUSEUM MAP</button>
+    </div>
   </header>
 
-  <main>
-    <!-- ヒーロー -->
-    <section class="hero">
-      <div class="hero-slides" aria-hidden="true"></div>
-      <div class="hero-text">
-        <p class="eyebrow">Photographer based in Tokyo</p>
-        <h1>光と時間の、<br>静かな記録。</h1>
-        <a class="btn" href="#works">作品を見る</a>
-      </div>
-      <a class="scroll-hint" href="#works" aria-label="下へスクロール">Scroll</a>
-    </section>
-
-    <!-- 作品 -->
-    <section class="section" id="works">
-      <div class="section-head">
-        <h2>Works</h2>
-        <p>作品</p>
-      </div>
-      <div class="filters" role="tablist" aria-label="カテゴリで絞り込み"></div>
-      <div class="gallery" id="gallery"></div>
-    </section>
-
-    <!-- プロフィール -->
-    <section class="section about" id="about">
-      <div class="about-photo">
-        <img src="images/works/work-07.svg" alt="写真家 AON のポートレート" loading="lazy">
-      </div>
-      <div class="about-body">
-        <div class="section-head left">
-          <h2>About</h2>
-          <p>プロフィール</p>
+  <main id="museum">
+    <!-- ENTRANCE -->
+    <section class="space entrance" id="entrance" data-space="entrance" aria-label="エントランス">
+      <div class="ceiling" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="entrance-wall">
+        <div class="entrance-lettering">
+          <p class="lettering-en">AON <br>PHOTOGRAPH <br>MUSEUM</p>
+          <p class="lettering-ja">AON 写真収蔵館</p>
+          <dl class="hours-plate" id="hours-plate">
+            <dt>開館時間</dt><dd id="hours-range">10:00 — 18:00</dd>
+            <dt>入館料</dt><dd>無料</dd>
+          </dl>
+          <p class="closed-note" id="closed-note">MUSEUM CLOSED<br><span>ただいま閉館時間です。照明を落とした館内を、そのままご覧いただけます。</span></p>
         </div>
-        <h3>AON <small>／ 写真家</small></h3>
-        <p>東京を拠点に活動するフォトグラファー。人物・風景・街の断片を、自然光を中心とした静かなトーンで切り取る。雑誌、広告、ブランドのビジュアル制作のほか、個展・グループ展にも参加。</p>
-        <dl class="timeline">
-          <dt>2026</dt><dd>個展「余白の光」開催（東京）</dd>
-          <dt>2024</dt><dd>写真集『Quiet Hours』刊行</dd>
-          <dt>2022</dt><dd>フリーランスとして独立</dd>
-          <dt>2018</dt><dd>写真スタジオにてアシスタント</dd>
+        <div class="entrance-work" id="entrance-work"></div>
+      </div>
+      <div class="entrance-foot">
+        <a class="enter-btn" href="#central-hall" data-goto="central-hall">入館する <span aria-hidden="true">→</span></a>
+        <a class="now-on-view" id="now-on-view" href="#exhibition" data-goto="exhibition"></a>
+      </div>
+      <div class="floor" aria-hidden="true"></div>
+    </section>
+
+    <!-- CENTRAL HALL / ROOMS / SPECIAL EXHIBITION は script.js が生成 -->
+    <div id="galleries"></div>
+
+    <!-- ARCHIVE -->
+    <section class="space archive" id="archive" data-space="archive" aria-labelledby="archive-title">
+      <header class="room-sign">
+        <p class="sign-no">ARCHIVE / COLLECTION</p>
+        <h2 class="sign-name" id="archive-title">収蔵品目録</h2>
+        <p class="sign-text">当館が収蔵するすべての写真作品の目録です。展示室に出ていない作品は収蔵庫に保管されています。番号を選ぶと、その作品を間近で見られます。</p>
+      </header>
+      <div class="catalogue">
+        <div class="catalogue-filter" role="group" aria-label="収蔵場所で絞り込む">
+          <button type="button" data-filter="all" aria-pressed="true">すべて</button>
+          <button type="button" data-filter="view" aria-pressed="false">展示中</button>
+          <button type="button" data-filter="storage" aria-pressed="false">収蔵庫</button>
+          <span class="catalogue-count" id="catalogue-count"></span>
+        </div>
+        <div class="catalogue-scroll">
+          <table class="catalogue-table">
+            <thead>
+              <tr><th scope="col">No.</th><th scope="col">Title</th><th scope="col">Year</th><th scope="col" class="c-medium">Medium</th><th scope="col">Location</th></tr>
+            </thead>
+            <tbody id="catalogue-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="catalogue-peek" id="catalogue-peek" aria-hidden="true"><img alt=""></div>
+    </section>
+
+    <!-- JOURNAL -->
+    <section class="space journal" id="journal" data-space="journal" aria-labelledby="journal-title">
+      <header class="room-sign">
+        <p class="sign-no">JOURNAL</p>
+        <h2 class="sign-name" id="journal-title">館内記録</h2>
+        <p class="sign-text">展示替え、収蔵、撮影の記録。当館で起きたことを日付順に残しています。</p>
+      </header>
+      <ol class="logbook" id="logbook"></ol>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="space about" id="about" data-space="about" aria-labelledby="about-title">
+      <div class="about-panel">
+        <p class="sign-no">ABOUT THE MUSEUM</p>
+        <h2 class="about-title" id="about-title">この館について</h2>
+        <div class="about-text">
+          <p>この場所は、写真家 AON によって撮影された写真作品を収蔵・展示するためのオンラインミュージアムです。</p>
+          <p>館内には四つの常設展示室と、期間ごとに入れ替わる特別展示室、そして収蔵庫があります。展示室ごとに作品の掛け方を変えています。歩く速さを変えながら、一点ずつご覧ください。</p>
+        </div>
+        <dl class="museum-facts">
+          <dt>開館時間</dt><dd>10:00 — 18:00（日本時間）<br><small>閉館時間中も照明を落として公開しています</small></dd>
+          <dt>休館日</dt><dd>なし</dd>
+          <dt>入館料</dt><dd>無料</dd>
+          <dt>所在地</dt><dd>オンライン</dd>
+          <dt>収蔵作品数</dt><dd id="fact-count">—</dd>
         </dl>
-        <ul class="socials">
+      </div>
+
+      <div class="photographer">
+        <p class="sign-no">PHOTOGRAPHER</p>
+        <div class="photographer-body">
+          <h3 class="photographer-name">AON <span>写真家</span></h3>
+          <p>東京を拠点に活動。人の気配が残る室内や、光が壁に落ちる時間、遠くの地形を、自然光を中心に撮影している。雑誌・広告・ブランドの撮影のほか、個展を中心に作品を発表。</p>
+          <dl class="cv">
+            <dt>2026</dt><dd>個展「夜の輪郭」</dd>
+            <dt>2024</dt><dd>写真集『Quiet Hours』刊行</dd>
+            <dt>2022</dt><dd>独立、フリーランスとして活動開始</dd>
+            <dt>2018</dt><dd>写真スタジオ勤務</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="reception" id="reception">
+        <p class="sign-no">RECEPTION</p>
+        <h3 class="reception-title">撮影のご依頼・お問い合わせ</h3>
+        <p>ポートレート、ブランド・広告、書籍や展示のための撮影をお受けしています。内容・日程・ご予算をメールでお知らせください。2〜3 営業日以内にご返信します。</p>
+        <div class="email-row">
+          <a class="email" id="email" href="mailto:hello@example.com">hello@example.com</a>
+          <button class="copy-btn" id="copy-btn" type="button">アドレスをコピー</button>
+          <span class="copy-status" id="copy-status" role="status"></span>
+        </div>
+        <ul class="links">
           <li><a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a></li>
           <li><a href="https://x.com/" target="_blank" rel="noopener">X</a></li>
-          <li><a href="https://note.com/" target="_blank" rel="noopener">note</a></li>
         </ul>
       </div>
     </section>
 
-    <!-- 撮影メニュー -->
-    <section class="section" id="services">
-      <div class="section-head">
-        <h2>Services</h2>
-        <p>撮影メニュー</p>
-      </div>
-      <div class="services">
-        <article class="service">
-          <h3>Portrait</h3>
-          <p>プロフィール写真、アーティスト写真、家族写真など。ロケーション撮影にも対応します。</p>
-          <p class="price">¥30,000〜</p>
-        </article>
-        <article class="service">
-          <h3>Commercial</h3>
-          <p>商品撮影、ブランドイメージ、Web・広告用ビジュアル。企画段階からご相談ください。</p>
-          <p class="price">¥80,000〜</p>
-        </article>
-        <article class="service">
-          <h3>Event / Wedding</h3>
-          <p>ウェディング、パーティー、イベントの記録撮影。当日の空気ごと残します。</p>
-          <p class="price">¥60,000〜</p>
-        </article>
-      </div>
-      <p class="note">※ 料金は目安です。内容・時間・納品点数によりお見積もりいたします。</p>
-    </section>
-
-    <!-- お問い合わせ -->
-    <section class="section contact" id="contact">
-      <div class="section-head">
-        <h2>Contact</h2>
-        <p>お問い合わせ</p>
-      </div>
-      <p class="contact-lead">撮影のご依頼・ご相談は、以下のフォームよりお気軽にご連絡ください。<br>通常 2〜3 営業日以内にご返信いたします。</p>
-      <form class="contact-form" id="contact-form">
-        <label>お名前<input type="text" name="name" required autocomplete="name"></label>
-        <label>メールアドレス<input type="email" name="email" required autocomplete="email"></label>
-        <label>ご依頼内容
-          <select name="type">
-            <option>ポートレート</option>
-            <option>コマーシャル</option>
-            <option>イベント / ウェディング</option>
-            <option>その他</option>
-          </select>
-        </label>
-        <label>メッセージ<textarea name="message" rows="6" required></textarea></label>
-        <button class="btn" type="submit">送信する</button>
-        <p class="form-status" role="status"></p>
-      </form>
-    </section>
+    <!-- EXIT -->
+    <footer class="space exit" id="exit" data-space="exit">
+      <p class="exit-sign"><span aria-hidden="true">←</span> EXIT</p>
+      <p class="exit-thanks">ご来館ありがとうございました。</p>
+      <a class="enter-btn" href="#entrance" data-goto="entrance">もう一度入口から歩く</a>
+      <p class="exit-copy">&copy; <span id="year"></span> AON. 館内の作品の無断転載・使用を禁じます。</p>
+    </footer>
   </main>
 
-  <footer class="site-footer">
-    <p>&copy; <span id="year"></span> AON Photography. All rights reserved.</p>
-    <p class="small">掲載写真の無断転載・使用を禁じます。</p>
-  </footer>
-
-  <!-- ライトボックス -->
-  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="写真の拡大表示" hidden>
-    <button class="lb-close" aria-label="閉じる">&times;</button>
-    <button class="lb-prev" aria-label="前の写真">&#8249;</button>
-    <figure>
-      <img alt="">
-      <figcaption></figcaption>
-    </figure>
-    <button class="lb-next" aria-label="次の写真">&#8250;</button>
+  <!-- MUSEUM MAP -->
+  <div class="map" id="map" role="dialog" aria-modal="true" aria-labelledby="map-title" hidden>
+    <div class="map-sheet">
+      <header class="map-head">
+        <div>
+          <p class="map-kicker">FLOOR PLAN — 1F</p>
+          <h2 class="map-title" id="map-title">館内案内図</h2>
+        </div>
+        <button class="map-close" type="button" data-close-map>閉じる <span aria-hidden="true">×</span></button>
+      </header>
+      <div class="map-body">
+        <div class="map-plan" id="map-plan"></div>
+        <ol class="map-index" id="map-index"></ol>
+      </div>
+      <p class="map-foot">黒い丸が現在地です。部屋の名前を選ぶと、その展示室まで移動します。</p>
+    </div>
   </div>
 
-  <script src="js/works.js"></script>
-  <script src="js/main.js"></script>
+  <!-- 作品の前まで近づく -->
+  <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="作品を間近で見る" hidden>
+    <div class="viewer-stage">
+      <div class="viewer-work">
+        <div class="frame viewer-frame" id="viewer-frame"><span class="mat"><img id="viewer-img" alt=""></span></div>
+      </div>
+      <aside class="viewer-label">
+        <p class="vl-no" id="vl-no"></p>
+        <h2 class="vl-title" id="vl-title"></h2>
+        <p class="vl-year" id="vl-year"></p>
+        <dl class="vl-meta" id="vl-meta"></dl>
+        <p class="vl-note" id="vl-note"></p>
+        <p class="vl-where" id="vl-where"></p>
+        <div class="vl-nav">
+          <button type="button" id="vl-prev" aria-label="前の作品">←</button>
+          <span id="vl-count"></span>
+          <button type="button" id="vl-next" aria-label="次の作品">→</button>
+        </div>
+        <button class="vl-back" type="button" id="vl-back">展示室に戻る <kbd>ESC</kbd></button>
+      </aside>
+    </div>
+  </div>
+
+  <!-- 展示室の移動（暗転） -->
+  <div class="curtain" id="curtain" aria-hidden="true"><p id="curtain-text"></p></div>
+
+  <script src="script.js"></script>
 </body>
 </html>

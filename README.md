@@ -1,33 +1,72 @@
-# AON Photography — ポートフォリオサイト
+# AON 写真収蔵館 — AON Photograph Museum
 
-写真家のためのシンプルな静的ポートフォリオサイトです。ビルド不要で、HTML / CSS / JavaScript だけで動きます。
+写真家 AON の写真作品を収蔵・展示する、小さなオンライン博物館です。
+HTML / CSS / JavaScript のみで動き、ビルドや外部ライブラリは必要ありません。
 
-## 構成
+## 館内の順路
 
 ```
-index.html        ページ本体（ヒーロー / Works / About / Services / Contact）
-css/style.css     デザイン（ライト・ダークモード対応）
-js/works.js       作品データ（★写真の差し替えはここだけ）
-js/main.js        ギャラリー・絞り込み・ライトボックス・スライドショー・フォーム
-images/works/     作品画像（現在はサンプルの SVG）
+ENTRANCE（入口）
+  → CENTRAL HALL（中央ホール：代表作 1〜3 点）
+  → ROOM 01 LIGHT（大型作品を一面に一点）
+  → ROOM 02 PEOPLE（小品をまとめて掛けるサロン掛け）
+  → ROOM 03 LANDSCAPE（横長作品の回廊）
+  → ROOM 04 OBJECTS（大きな余白に一点ずつ）
+  → SPECIAL EXHIBITION（特別展：2点ずつ対に）
+  → ARCHIVE（収蔵品目録）
+  → JOURNAL（館内記録）
+  → ABOUT（この館について／写真家／受付）
+  → EXIT
+```
+
+- 右上の **MUSEUM MAP** で館内案内図が開き、現在地の確認や展示室への移動ができます
+- 作品をクリックすると「作品の前まで近づく」表示になります（ESC で展示室に戻る、← → で同じ部屋の作品へ）
+- 開館時間（10:00–18:00 日本時間）の外は照明が落ちた館内になります。ヘッダーの OPEN / CLOSED ボタンで照明を切り替えられます
+- 環境音（空調音）は SOUND ボタンを押したときだけ鳴ります
+
+## ファイル構成
+
+```
+index.html   館の骨組み（入口・収蔵庫・記録室・案内所・出口・案内図）
+style.css    壁・床・額・照明・サインなどのデザイン
+script.js    ★収蔵品データ（先頭部分）と、館内を組み立てるプログラム
+images/
+  hall/        入口・中央ホールの作品
+  room01/ 〜 room04/   各展示室の作品
+  exhibition/  特別展の作品
+  archive/     収蔵庫だけにある作品
+scripts/make_placeholders.py   仮の画像を作るスクリプト（本番では不要）
 ```
 
 ## 写真の差し替え方
 
-1. `images/works/` に写真（JPG 推奨、長辺 2000px 前後・1枚 500KB 程度まで）を置く
-2. `js/works.js` の各項目の `src` / `title` / `category` / `year` を書き換える
-3. トップのスライドショーに出したい写真は `hero: true` にする
+1. 写真（JPG 推奨、長辺 2400px 前後）を `images/` の該当フォルダに入れる
+2. `script.js` 先頭の `WORKS` で、その作品の `src` を書き換える
+   （例：`src: "images/room01/005.jpg"`）。タイトル・制作年・技法・解説もここで編集します
+3. 今入っている `.svg` の画像はすべて仮のものです。差し替えたら削除して構いません
 
-カテゴリは `category` に書いた名前から絞り込みボタンが自動で作られます。
+## 展示替え
 
-## その他の編集ポイント
+- **展示室の作品を変える**：`script.js` の `ROOMS` の `works` に収蔵番号を並べる
+- **部屋の名前・掛け方を変える**：`name` / `ja` / `text` / `layout` / `frame` を編集
+  - `layout`: `large`（大型1点ずつ）/ `salon`（まとめ掛け）/ `corridor`（横長の回廊）/ `solo`（余白に小さく）/ `pair`（2点ずつ）/ `hall`
+  - `frame`: `white` / `black` / `oak` / `none`
+- **展示室を増やす**：`ROOMS` に項目を追加（`map` で案内図上の位置を指定。横 12 × 縦 9 のマス目）
+- **どの部屋にも置かない作品**は、自動的に「収蔵庫」として目録にだけ載ります
 
-- **名前・キャッチコピー・プロフィール・料金**: `index.html` の該当箇所を編集
-- **プロフィール写真**: `index.html` の About セクションの `<img src>` を変更
-- **SNS リンク**: `index.html` の `.socials` のリンク先を変更
-- **お問い合わせ先**: `js/main.js` の `CONTACT_EMAIL` を自分のアドレスに変更
-  （現在はメールソフトを起動する方式。Formspree などのフォームサービスを使う場合は `<form>` に `action` を設定し、送信処理を外してください）
-- **テーマカラー**: `css/style.css` 冒頭の `:root` の変数（`--accent` など）
+## 新しい展覧会を始める
+
+`script.js` の `EXHIBITION` を書き換えます（タイトル・会期・解説・作品）。
+あわせて `JOURNAL` の先頭に記録を追加すると、「新しい展覧会が始まった」ことが館内記録に残ります。
+
+```js
+{ date: "2026.12.21", type: "INSTALLATION NOTE", text: "特別展「〇〇」を開幕。" },
+```
+
+## そのほかの設定
+
+- 館名・写真家名・開館時間・メールアドレス：`script.js` の `MUSEUM`
+- 館の紹介文・プロフィール・経歴・SNS：`index.html` の ABOUT セクション
 
 ## ローカルで確認
 
@@ -38,4 +77,4 @@ python3 -m http.server 8000
 
 ## 公開（GitHub Pages）
 
-リポジトリの Settings → Pages で、Source を公開したいブランチの `/ (root)` に設定すると公開されます。
+リポジトリの Settings → Pages で、公開するブランチの `/ (root)` を選ぶと公開されます。
