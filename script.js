@@ -277,10 +277,40 @@ const PLACES = {
     },
   };
 
+  // 暗幕：次のテーマ（展示室）の手前に掛かる黒い幕。くぐり抜けた先に部屋の名前が浮かぶ
+  function veil(g) {
+    const r = routeById.get(g.id);
+    const name = r && r.sub ? `${r.label} — ${r.sub}` : g.no;
+    const title = g.id === "central-hall"
+      ? `<h2 class="veil-name veil-name--ja">${esc(g.ja)}</h2>`
+      : `<h2 class="veil-name">${esc(g.name)}<span>${esc(g.ja)}</span></h2>`;
+    return `<div class="veil" id="veil-${g.id}" data-space="${g.id}">
+      <div class="veil-sticky">
+        <div class="veil-room">
+          <div class="veil-light" aria-hidden="true"></div>
+          <div class="veil-sign">
+            <p class="veil-no">${esc(g.no)}</p>
+            ${title}
+            ${g.period ? `<p class="veil-period">${esc(g.period)}</p>` : ""}
+            <p class="veil-text">${esc(g.text)}</p>
+            <p class="veil-count">展示作品 ${g.works.length} 点</p>
+          </div>
+        </div>
+        <div class="veil-curtain" aria-hidden="true">
+          <div class="veil-panel veil-l"></div>
+          <div class="veil-panel veil-r"></div>
+          <div class="veil-valance"></div>
+          <p class="veil-label"><span>この先</span>${esc(name)}<small>${esc(g.ja)}</small></p>
+        </div>
+      </div>
+    </div>`;
+  }
+
   function passage(next) {
     if (!next) return "";
     const name = next.sub ? `${next.label} — ${next.sub}` : next.label;
-    return `<a class="passage" href="#${next.id}" data-goto="${next.id}">
+    const toGallery = GALLERIES.some((g) => g.id === next.id);
+    return `<a class="passage${toGallery ? " passage--to-gallery" : ""}" href="#${next.id}" data-goto="${next.id}">
       <span class="passage-door" aria-hidden="true"></span>
       <span class="passage-text"><span class="passage-kicker">次の展示室へ</span>${esc(name)}<span class="passage-ja">${esc(next.ja)}</span></span>
     </a>`;
@@ -290,7 +320,7 @@ const PLACES = {
     const html = GALLERIES.map((g) => {
       const idx = ROUTE.findIndex((r) => r.id === g.id);
       const kind = g.id === "central-hall" ? "hall" : g.id === "exhibition" ? "special" : "room";
-      return `<section class="space gallery gallery--${kind} layout-${g.layout}" id="${g.id}" data-space="${g.id}" aria-label="${esc(g.no)} ${esc(g.ja)}">
+      return `${veil(g)}<section class="space gallery gallery--${kind} layout-${g.layout}" id="${g.id}" data-space="${g.id}" aria-label="${esc(g.no)} ${esc(g.ja)}">
         ${roomSign(g)}
         ${LAYOUTS[g.layout] ? LAYOUTS[g.layout](g) : LAYOUTS.large(g)}
         <div class="baseboard" aria-hidden="true"></div>
@@ -515,7 +545,8 @@ const PLACES = {
     closeMap(false);
     const r = routeById.get(id);
     const jump = () => {
-      target.scrollIntoView({ behavior: "instant", block: "start" });
+      const veilEl = document.documentElement.classList.contains("walk") && document.getElementById(`veil-${id}`);
+      (veilEl || target).scrollIntoView({ behavior: "instant", block: "start" });
       if (push) history.replaceState(null, "", `#${id}`);
       setHere(id);
     };
@@ -735,6 +766,20 @@ const PLACES = {
 
   // 足音（SOUND が ON のときだけ）。短く低いノイズを、床の硬さくらいに絞る
   let stepBuf = null;
+  // 暗幕をくぐるときの、布のこすれる音（SOUND が ON のときだけ）
+  function playSwish() {
+    if (!soundOn || !audio) return;
+    const ctx = audio.ctx, len = Math.floor(ctx.sampleRate * 0.9);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) { const t = i / len; d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * t) * (0.6 + 0.4 * Math.sin(t * 40)); }
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 0.7;
+    bp.frequency.setValueAtTime(700, ctx.currentTime); bp.frequency.linearRampToValueAtTime(1800, ctx.currentTime + 0.9);
+    const g = ctx.createGain(); g.gain.value = 0.12;
+    src.connect(bp).connect(g).connect(ctx.destination);
+    src.start();
+  }
+
   function playStep(strength) {
     if (!soundOn || !audio) return;
     const ctx = audio.ctx;
@@ -852,6 +897,7 @@ const PLACES = {
           </div>
         </div>
         <div class="sv-shade" aria-hidden="true"></div>
+        <div class="sv-dim" aria-hidden="true"></div>
         <div class="sv-hud">
           <div class="sv-card"><p class="sv-room">${esc(g.no)}${g.id === "central-hall" ? "" : ` — ${esc(g.name)}`}<span>${esc(g.ja)}</span></p><p class="sv-now" aria-live="polite"></p></div>
           <div class="sv-nav">
@@ -881,7 +927,7 @@ const PLACES = {
 
     return {
       g, el, section, stops: items, keys, total, len,
-      sticky: $(".sv-sticky", el), view: $(".sv-view", el), world: $(".sv-world", el), shade: $(".sv-shade", el),
+      sticky: $(".sv-sticky", el), view: $(".sv-view", el), world: $(".sv-world", el), shade: $(".sv-shade", el), dim: $(".sv-dim", el),
       floor: $(".sv-floor", el), ceil: $(".sv-ceil", el), walls,
       now: $(".sv-now", el), count: $(".sv-count", el), needle: $(".sv-needle", el), hint: $(".sv-hint", el),
       focus: -2, top: 0, height: 0, lastZ: null, walked: 0, activity: 0, shown: false,
@@ -892,7 +938,12 @@ const PLACES = {
     if (reduceMotion || !(window.CSS && CSS.supports("transform-style", "preserve-3d"))) return;
     root.classList.add("walk");
     const scenes = GALLERIES.map(buildScene).filter(Boolean);
-    const passages = $$(".passage").map((el) => ({ el, door: $(".passage-door", el), text: $(".passage-text", el), top: 0, h: 0 }));
+    const passages = $$(".passage:not(.passage--to-gallery)").map((el) => ({ el, door: $(".passage-door", el), text: $(".passage-text", el), top: 0, h: 0 }));
+    const veils = $$(".veil").map((el) => ({
+      el, top: 0, h: 0, open: false,
+      curtain: $(".veil-curtain", el), l: $(".veil-l", el), r: $(".veil-r", el), label: $(".veil-label", el),
+      room: $(".veil-room", el), sign: $(".veil-sign", el), light: $(".veil-light", el),
+    }));
     const intro = $("#entrance");
     const introPlan = $("#intro-plan");
     const signs = $$(".room-sign .sign-name").map((el) => ({ el, top: 0, h: 0 }));
@@ -930,6 +981,7 @@ const PLACES = {
       const sy = window.scrollY;
       scenes.forEach((s) => { const r = s.el.getBoundingClientRect(); s.top = r.top + sy; s.height = r.height; });
       passages.forEach((p) => { const r = p.el.getBoundingClientRect(); p.top = r.top + sy; p.h = r.height; });
+      veils.forEach((v) => { const r = v.el.getBoundingClientRect(); v.top = r.top + sy; v.h = r.height; });
       signs.forEach((t) => { t.el.style.transform = ""; const r = t.el.getBoundingClientRect(); t.top = r.top + sy; t.h = r.height; });
       introH = intro ? intro.offsetHeight : 0;
       scenes.forEach((s) => (s.focus = -2));
@@ -994,6 +1046,9 @@ const PLACES = {
         const yaw = cam.yaw + look.yaw;
         s.world.style.transform = `translateZ(${P}px) rotateX(${look.pitch.toFixed(2)}deg) rotateY(${(-yaw).toFixed(2)}deg) translate3d(0, ${(-bob).toFixed(2)}px, ${zpx.toFixed(1)}px)`;
         s.needle.style.transform = `rotate(${yaw.toFixed(1)}deg)`;
+        // 暗幕の暗がりから入り、歩き出すと照明がつく
+        const lights = clampN(prog / 0.05, 0, 1);
+        s.dim.style.opacity = (1 - ease(lights)).toFixed(3);
 
         if (cam.stop !== s.focus || s._end !== cam.end) {
           s.focus = cam.stop; s._end = cam.end;
@@ -1025,6 +1080,25 @@ const PLACES = {
         p.door.style.opacity = (1 - Math.max(0, k - 0.7) / 0.3).toFixed(3);
         p.text.style.transform = `scale(${(1 + k * 0.25).toFixed(3)})`;
         p.text.style.opacity = (1 - Math.max(0, k - 0.45) / 0.35).toFixed(3);
+      }
+      // 暗幕：近づく → 左右にかき分けてくぐる → 暗い部屋に、テーマが浮かび上がる
+      for (const v of veils) {
+        if (sy + vh < v.top - vh * 0.2 || sy > v.top + v.h) continue;
+        const q = clampN((sy + headerH - v.top) / Math.max(1, v.h - H), 0, 1);
+        const a = ease(clampN(q / 0.3, 0, 1));                  // 近づく
+        const b = ease(clampN((q - 0.28) / 0.42, 0, 1));        // 幕を分ける
+        const c = ease(clampN((q - 0.62) / 0.3, 0, 1));         // テーマが浮かぶ
+        const zoom = 1 + a * 0.14 + b * 0.55;
+        v.curtain.style.transform = `scale(${zoom.toFixed(4)})`;
+        v.l.style.transform = `translateX(${(-b * 72).toFixed(2)}%) scaleX(${(1 - b * 0.38).toFixed(4)}) skewY(${(b * -2.5).toFixed(2)}deg)`;
+        v.r.style.transform = `translateX(${(b * 72).toFixed(2)}%) scaleX(${(1 - b * 0.38).toFixed(4)}) skewY(${(b * 2.5).toFixed(2)}deg)`;
+        v.label.style.opacity = (1 - clampN((q - 0.12) / 0.16, 0, 1)).toFixed(3);
+        v.curtain.style.opacity = (1 - clampN((q - 0.66) / 0.12, 0, 1)).toFixed(3);
+        v.light.style.opacity = (0.15 + b * 0.85).toFixed(3);
+        v.sign.style.opacity = c.toFixed(3);
+        v.sign.style.transform = `translate3d(0, ${((1 - c) * 24).toFixed(1)}px, 0) scale(${(0.96 + c * 0.04).toFixed(4)})`;
+        const open = b > 0.15;
+        if (open !== v.open) { v.open = open; if (open) playSwish(); }
       }
       // 入口の案内図：下へ進むと、中央ホールへ吸い込まれるように近づく
       if (introPlan && sy < introH * 1.2) {
