@@ -9,7 +9,7 @@
   --wall-shade: #e2dfd8;    /* 壁の陰・天井 */
   --stone: #dcd9d2;         /* 中央ホールの石壁 */
   --paper: #f5f3ee;         /* 収蔵庫・記録室の紙 */
-  --special: #3a3936;       /* 特別展示室の塗装壁 */
+  --special: #1d2433;       /* 特別展示室の塗装壁（夜の青） */
   --corridor: #242320;      /* 展示室をつなぐ通路 */
   --floor-1: #bba585;       /* 木の床 */
   --floor-2: #a78f6f;
@@ -47,7 +47,7 @@
   --wall-shade: #222120;
   --stone: #2d2c29;
   --paper: #252422;
-  --special: #1c1b1a;
+  --special: #111622;
   --corridor: #0e0e0d;
   --floor-1: #3b3229;
   --floor-2: #2f2821;

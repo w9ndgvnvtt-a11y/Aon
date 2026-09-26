@@ -18,54 +18,70 @@ const MUSEUM = {
 /* ---------------------------------------------------------------------
    2. 収蔵品目録（すべての作品）
    no      : 収蔵番号。ラベルに「PHOTO 001」と表示されます
-   src     : 画像ファイル（images/ 以下。JPG に差し替えて構いません）
-   title   : 作品名        year   : 制作年
+   src     : 画像ファイル（images/ 以下）
+   title   : 作品名        year   : 制作年（不明なときは "n.d." ＝ 制作年不詳）
    medium  : 技法・素材    camera : 撮影情報（任意）
    place   : 撮影地（任意） note   : 解説文（任意。作品の前に近づいたとき表示）
    展示室に置かない作品は、自動的に「収蔵庫」扱いになります。
    --------------------------------------------------------------------- */
 const WORKS = [
-  { no: "001", src: "images/hall/001.svg", title: "Untitled", year: 2026, medium: "Digital Photograph", camera: "35mm / Color", place: "Tokyo", note: "当館の入口に掛けている作品。午前十時、開館と同じ時刻の光。" },
-  { no: "002", src: "images/hall/002.svg", title: "遠い稜線", year: 2026, medium: "Archival Pigment Print", camera: "Medium Format / Color", place: "Nagano", note: "この館の中心に置いている一枚。見えているものより、見えていない距離を撮ろうとした。" },
-  { no: "003", src: "images/hall/003.svg", title: "Portrait of M.", year: 2025, medium: "Gelatin Silver Print", camera: "35mm / B&W" },
-  { no: "004", src: "images/hall/004.svg", title: "Vessel", year: 2025, medium: "Digital Photograph", camera: "Medium Format / Color" },
+  { no: "001", src: "images/hall/001.jpg", title: "島", year: "n.d.", medium: "Photograph", note: "海に浮かぶ小さな島と、その上の夏の雲。当館の入口に掛けている一枚。" },
+  { no: "002", src: "images/hall/002.jpg", title: "海へ続く踏切", year: "n.d.", medium: "Photograph", place: "Kanagawa", note: "踏切を渡った先に、そのまま海がある。この館の中心に置いている作品。" },
+  { no: "003", src: "images/hall/003.jpg", title: "空に掲げる", year: "n.d.", medium: "Photograph", note: "青い空に、青いラベルのボトルを重ねて。" },
+  { no: "004", src: "images/hall/004.jpg", title: "くらげ", year: "n.d.", medium: "Photograph" },
 
-  { no: "005", src: "images/room01/005.svg", title: "朝の壁", year: 2026, medium: "Digital Photograph", camera: "35mm / Color", place: "Tokyo", note: "東向きの部屋に、七時から十五分だけ差す光。" },
-  { no: "006", src: "images/room01/006.svg", title: "Light Study No.3", year: 2025, medium: "Archival Pigment Print", camera: "Medium Format / Color" },
-  { no: "007", src: "images/room01/007.svg", title: "階段の光", year: 2024, medium: "Gelatin Silver Print", camera: "35mm / B&W", place: "Kyoto" },
-  { no: "008", src: "images/room01/008.svg", title: "Afternoon, Kitchen", year: 2026, medium: "Digital Photograph", camera: "35mm / Color" },
+  { no: "005", src: "images/room01/005.jpg", title: "白い雲", year: "n.d.", medium: "Photograph" },
+  { no: "006", src: "images/room01/006.jpg", title: "薄青", year: "n.d.", medium: "Photograph" },
+  { no: "007", src: "images/room01/007.jpg", title: "かもめ", year: "n.d.", medium: "Photograph", note: "雲のあいだを一羽だけ横切っていく。" },
+  { no: "008", src: "images/room01/008.jpg", title: "昼の月", year: "n.d.", medium: "Photograph", note: "青一色の空の、ほんの小さな白い点。" },
 
-  { no: "009", src: "images/room02/009.svg", title: "K.", year: 2026, medium: "Digital Photograph", camera: "35mm / Color" },
-  { no: "010", src: "images/room02/010.svg", title: "待合室", year: 2025, medium: "Digital Photograph", camera: "35mm / Color" },
-  { no: "011", src: "images/room02/011.svg", title: "Untitled (Back)", year: 2024, medium: "Gelatin Silver Print", camera: "35mm / B&W" },
-  { no: "012", src: "images/room02/012.svg", title: "Sister", year: 2026, medium: "Digital Photograph", camera: "Medium Format / Color" },
-  { no: "013", src: "images/room02/013.svg", title: "窓辺の人", year: 2025, medium: "Digital Photograph", camera: "35mm / Color" },
-  { no: "014", src: "images/room02/014.svg", title: "Two Chairs", year: 2023, medium: "Digital Photograph", camera: "35mm / Color" },
-  { no: "015", src: "images/room02/015.svg", title: "Profile", year: 2026, medium: "Gelatin Silver Print", camera: "35mm / B&W" },
+  { no: "009", src: "images/room02/009.jpg", title: "横断歩道", year: "n.d.", medium: "Photograph" },
+  { no: "010", src: "images/room02/010.jpg", title: "進行方向", year: "n.d.", medium: "Photograph" },
+  { no: "011", src: "images/room02/011.jpg", title: "横断歩道（冬）", year: "n.d.", medium: "Photograph" },
+  { no: "012", src: "images/room02/012.jpg", title: "30", year: "n.d.", medium: "Photograph" },
+  { no: "013", src: "images/room02/013.jpg", title: "塔", year: "n.d.", medium: "Photograph", place: "Kyoto" },
+  { no: "014", src: "images/room02/014.jpg", title: "編隊", year: "n.d.", medium: "Photograph" },
+  { no: "015", src: "images/room02/015.jpg", title: "ヘリコプター", year: "n.d.", medium: "Photograph" },
 
-  { no: "016", src: "images/room03/016.svg", title: "Coastline I", year: 2026, medium: "Archival Pigment Print", camera: "Panoramic / Color", place: "Chiba" },
-  { no: "017", src: "images/room03/017.svg", title: "丘陵", year: 2025, medium: "Archival Pigment Print", camera: "Panoramic / Color", place: "Hokkaido" },
-  { no: "018", src: "images/room03/018.svg", title: "Coastline II", year: 2026, medium: "Archival Pigment Print", camera: "Panoramic / Color", place: "Chiba" },
-  { no: "019", src: "images/room03/019.svg", title: "北の平野", year: 2024, medium: "Gelatin Silver Print", camera: "Panoramic / B&W", place: "Hokkaido" },
-  { no: "020", src: "images/room03/020.svg", title: "Low Tide", year: 2025, medium: "Archival Pigment Print", camera: "Panoramic / Color" },
+  { no: "016", src: "images/room03/016.jpg", title: "海沿いの電車", year: "n.d.", medium: "Photograph", place: "Kanagawa" },
+  { no: "017", src: "images/room03/017.jpg", title: "浜辺の車", year: "n.d.", medium: "Photograph" },
+  { no: "018", src: "images/room03/018.jpg", title: "線路のある町", year: "n.d.", medium: "Photograph", place: "Kanagawa" },
+  { no: "019", src: "images/room03/019.jpg", title: "海面", year: "n.d.", medium: "Photograph" },
+  { no: "020", src: "images/room03/020.jpg", title: "富士の見える線路", year: "n.d.", medium: "Photograph", place: "Kanagawa" },
 
-  { no: "021", src: "images/room04/021.svg", title: "Vase, Morning", year: 2026, medium: "Digital Photograph", camera: "Medium Format / Color" },
-  { no: "022", src: "images/room04/022.svg", title: "器", year: 2025, medium: "Gelatin Silver Print", camera: "Large Format / B&W" },
-  { no: "023", src: "images/room04/023.svg", title: "Still Life with Cup", year: 2024, medium: "Digital Photograph", camera: "Medium Format / Color" },
+  { no: "021", src: "images/room04/021.jpg", title: "かき氷", year: "n.d.", medium: "Photograph" },
+  { no: "022", src: "images/room04/022.jpg", title: "カメラ", year: "n.d.", medium: "Photograph" },
+  { no: "023", src: "images/room04/023.jpg", title: "白鳥", year: "n.d.", medium: "Photograph" },
 
-  { no: "024", src: "images/exhibition/024.svg", title: "夜の輪郭 #1", year: 2026, medium: "Archival Pigment Print", camera: "35mm / Color", place: "Tokyo" },
-  { no: "025", src: "images/exhibition/025.svg", title: "夜の輪郭 #2", year: 2026, medium: "Archival Pigment Print", camera: "35mm / Color", place: "Tokyo" },
-  { no: "026", src: "images/exhibition/026.svg", title: "夜の輪郭 #3", year: 2026, medium: "Archival Pigment Print", camera: "35mm / Color", place: "Osaka" },
-  { no: "027", src: "images/exhibition/027.svg", title: "夜の輪郭 #4", year: 2026, medium: "Archival Pigment Print", camera: "35mm / Color", place: "Osaka" },
+  { no: "024", src: "images/exhibition/024.jpg", title: "-blur-", year: "n.d.", medium: "Photograph", note: "ピントを外した街の灯り。この特別展の表題作。" },
+  { no: "025", src: "images/exhibition/025.jpg", title: "青い時間のビル", year: "n.d.", medium: "Photograph" },
+  { no: "026", src: "images/exhibition/026.jpg", title: "電話ボックス", year: 2024, medium: "Film Photograph" },
+  { no: "027", src: "images/exhibition/027.jpg", title: "雲間の月", year: "n.d.", medium: "Photograph" },
 
-  { no: "028", src: "images/archive/028.svg", title: "Evening", year: 2025, medium: "Digital Photograph", camera: "35mm / Color" },
-  { no: "029", src: "images/archive/029.svg", title: "Untitled", year: 2024, medium: "Gelatin Silver Print", camera: "35mm / B&W" },
-  { no: "030", src: "images/archive/030.svg", title: "Table", year: 2023, medium: "Digital Photograph", camera: "Medium Format / Color" },
-  { no: "031", src: "images/archive/031.svg", title: "Window", year: 2025, medium: "Digital Photograph", camera: "35mm / Color" },
-  { no: "032", src: "images/archive/032.svg", title: "終電のあと", year: 2023, medium: "Digital Photograph", camera: "35mm / Color" },
-  { no: "033", src: "images/archive/033.svg", title: "Bay", year: 2022, medium: "Archival Pigment Print", camera: "Medium Format / Color" },
-  { no: "034", src: "images/archive/034.svg", title: "Friend", year: 2022, medium: "Digital Photograph", camera: "35mm / Color" },
-  { no: "035", src: "images/archive/035.svg", title: "Object No.1", year: 2021, medium: "Gelatin Silver Print", camera: "Large Format / B&W" },
+  { no: "028", src: "images/archive/028.jpg", title: "一匹のくらげ", year: "n.d.", medium: "Photograph" },
+  { no: "029", src: "images/archive/029.jpg", title: "水に映る階段", year: "n.d.", medium: "Photograph" },
+  { no: "030", src: "images/archive/030.jpg", title: "階段の影", year: "n.d.", medium: "Photograph" },
+  { no: "031", src: "images/archive/031.jpg", title: "公衆電話", year: "n.d.", medium: "Photograph" },
+  { no: "032", src: "images/archive/032.jpg", title: "らせん", year: "n.d.", medium: "Photograph" },
+  { no: "033", src: "images/archive/033.jpg", title: "夜の池", year: "n.d.", medium: "Photograph" },
+  { no: "034", src: "images/archive/034.jpg", title: "夕方の建築", year: "n.d.", medium: "Photograph", place: "Tokyo" },
+  { no: "035", src: "images/archive/035.jpg", title: "白い軌跡", year: "n.d.", medium: "Photograph" },
+  { no: "036", src: "images/archive/036.jpg", title: "川とタワー", year: "n.d.", medium: "Photograph", place: "Tokyo" },
+  { no: "037", src: "images/archive/037.jpg", title: "夏の花", year: "n.d.", medium: "Photograph" },
+  { no: "038", src: "images/archive/038.jpg", title: "日の入り", year: "n.d.", medium: "Photograph" },
+  { no: "039", src: "images/archive/039.jpg", title: "満月", year: "n.d.", medium: "Photograph" },
+  { no: "040", src: "images/archive/040.jpg", title: "ビル群", year: "n.d.", medium: "Photograph" },
+  { no: "041", src: "images/archive/041.jpg", title: "霧の町", year: "n.d.", medium: "Photograph" },
+  { no: "042", src: "images/archive/042.jpg", title: "木漏れ日", year: "n.d.", medium: "Photograph" },
+  { no: "043", src: "images/archive/043.jpg", title: "鳳凰", year: "n.d.", medium: "Photograph", place: "Kyoto" },
+  { no: "044", src: "images/archive/044.jpg", title: "塔のある坂道", year: "n.d.", medium: "Photograph", place: "Kyoto" },
+  { no: "045", src: "images/archive/045.jpg", title: "狐", year: "n.d.", medium: "Photograph", place: "Kyoto" },
+  { no: "046", src: "images/archive/046.jpg", title: "朱の御堂", year: "n.d.", medium: "Photograph", place: "Kyoto" },
+  { no: "047", src: "images/archive/047.jpg", title: "金の楼閣", year: "n.d.", medium: "Photograph", place: "Kyoto" },
+  { no: "048", src: "images/archive/048.jpg", title: "舞台", year: "n.d.", medium: "Photograph", place: "Kyoto" },
+  { no: "049", src: "images/archive/049.jpg", title: "灯台", year: "n.d.", medium: "Photograph" },
+  { no: "050", src: "images/archive/050.jpg", title: "夕暮れのタワー", year: "n.d.", medium: "Photograph", place: "Tokyo" },
+  { no: "051", src: "images/archive/051.jpg", title: "月食", year: "n.d.", medium: "Photograph" },
 ];
 
 /* ---------------------------------------------------------------------
@@ -74,7 +90,7 @@ const WORKS = [
      "hall"     … 中央に大きく1点、左右に小さく（1〜3点）
      "large"    … 大型作品を1面に1点ずつ
      "salon"    … 小さな作品を1面にまとめて掛け、解説は横のパネルに
-     "corridor" … 横長の作品を横方向の回廊に連続して
+     "corridor" … 作品を横方向の回廊に連続して
      "solo"     … 大きな余白の中に小さく1点ずつ
      "pair"     … 2点ずつ対にして
    frame（額）: "white" | "black" | "oak" | "none"
@@ -82,38 +98,38 @@ const WORKS = [
    --------------------------------------------------------------------- */
 const HALL = {
   id: "central-hall", no: "CENTRAL HALL", name: "CENTRAL HALL", ja: "中央ホール",
-  layout: "hall", frame: "black",
-  text: "館の中心にある吹き抜けのホール。この写真家を代表する三点を掛けています。",
+  layout: "hall", frame: "white",
+  text: "館の中心にあるホール。この写真家の「青」を代表する三点を掛けています。海へ続く踏切、空に掲げたボトル、水槽のくらげ。",
   works: ["002", "003", "004"],
   map: { x: 4, y: 3, w: 4, h: 3.5 },
 };
 
 const ROOMS = [
   {
-    id: "room01", no: "ROOM 01", name: "LIGHT", ja: "光",
+    id: "room01", no: "ROOM 01", name: "SKY", ja: "空",
     layout: "large", frame: "white",
-    text: "壁に落ちる光は、数分ごとに形を変えます。部屋に差し込んだ光だけを主題にした作品を、一面に一点ずつ掛けました。",
+    text: "見上げた先にあるのは、雲と、ときどき鳥や昼の月だけ。何も写っていないように見える空を、一面に一点ずつ掛けました。",
     works: ["005", "006", "007", "008"],
     map: { x: 0, y: 3, w: 4, h: 3.5 },
   },
   {
-    id: "room02", no: "ROOM 02", name: "PEOPLE", ja: "人",
-    layout: "salon", frame: "oak",
-    text: "家族、友人、偶然居合わせた人。小さな肖像を一つの壁にまとめて掛けています。作品の番号は、壁の解説パネルと対応しています。",
+    id: "room02", no: "ROOM 02", name: "SIGNS", ja: "空に立つもの",
+    layout: "salon", frame: "white",
+    text: "標識、塔、飛行機。青い空を背にして立つものを、小さな額にまとめて一つの壁に掛けています。作品の番号は、壁の解説パネルと対応しています。",
     works: ["009", "010", "011", "012", "013", "014", "015"],
     map: { x: 0, y: 0, w: 4, h: 3 },
   },
   {
-    id: "room03", no: "ROOM 03", name: "LANDSCAPE", ja: "地形",
+    id: "room03", no: "ROOM 03", name: "COASTLINE", ja: "海沿い",
     layout: "corridor", frame: "none",
-    text: "海岸線と平野を撮った横長の作品を、細長い回廊に続けて並べました。横に歩くようにご覧ください。",
+    text: "海沿いを走る電車、浜辺に停めた車、線路の向こうの海。回廊を横に歩くように、海辺の線路をたどってください。",
     works: ["016", "017", "018", "019", "020"],
     map: { x: 4, y: 0, w: 4, h: 3 },
   },
   {
-    id: "room04", no: "ROOM 04", name: "OBJECTS", ja: "もの",
+    id: "room04", no: "ROOM 04", name: "SMALL THINGS", ja: "小さなもの",
     layout: "solo", frame: "black",
-    text: "器や日用品を撮った静物。大きな壁に小さく一点ずつ。近づかないと見えない距離に置いています。",
+    text: "かき氷、デジタルカメラ、白鳥のキーホルダー。手のひらに乗るくらいのものを、広い壁に一点ずつ掛けました。",
     works: ["021", "022", "023"],
     map: { x: 8, y: 0, w: 4, h: 3 },
   },
@@ -121,21 +137,19 @@ const ROOMS = [
 
 /* 特別展 — 新しい展覧会を始めるときは、ここを書き換えます */
 const EXHIBITION = {
-  id: "exhibition", no: "SPECIAL EXHIBITION 01", name: "CONTOURS OF NIGHT", ja: "夜の輪郭",
-  period: "2026.09.01 — 2026.12.20",
+  id: "exhibition", no: "SPECIAL EXHIBITION 01", name: "-blur-", ja: "にじむ夜",
+  period: "2026.09.26 — 2026.12.27",
   layout: "pair", frame: "black",
-  text: "街灯と窓明かりだけで撮影した新作のシリーズ。昼には見えない建物の輪郭を、四点で構成します。",
+  text: "ピントを外した街の灯り、青い時間のビル、夜の電話ボックス、雲間の月。輪郭がにじむ夜の光を集めました。企画：Aon&filosofia",
   works: ["024", "025", "026", "027"],
   map: { x: 8, y: 3, w: 4, h: 3.5 },
 };
 
 /* 館内記録（新しいものを上に） */
 const JOURNAL = [
-  { date: "2026.09.12", type: "INSTALLATION NOTE", text: "特別展「夜の輪郭」を開幕。新作4点を特別展示室に設置。" },
-  { date: "2026.09.01", type: "COLLECTION", text: "PHOTO 024〜027 を収蔵。" },
-  { date: "2026.08.21", type: "FIELD NOTE", text: "大阪で、夜のシリーズの追加撮影。街灯の色温度を記録しながら三晩歩く。" },
-  { date: "2026.07.03", type: "INSTALLATION NOTE", text: "ROOM 03 の展示替え。「Coastline II」を回廊の中央へ移設。" },
-  { date: "2026.05.15", type: "FIELD NOTE", text: "千葉の海岸線を再訪。干潮の時刻に合わせて撮影。" },
+  { date: "2026.09.26", type: "INSTALLATION NOTE", text: "特別展「-blur-」を開幕。夜の光を撮った4点を特別展示室に設置。" },
+  { date: "2026.09.26", type: "INSTALLATION NOTE", text: "常設展示室を SKY／SIGNS／COASTLINE／SMALL THINGS の4室に再構成。" },
+  { date: "2026.09.26", type: "COLLECTION", text: "PHOTO 001〜051 を収蔵品目録に登録。京都の寺社や夜の街の作品は収蔵庫に保管。" },
 ];
 
 /* 館内案内図に載せる、展示室以外の場所の位置 */
@@ -285,7 +299,7 @@ const PLACES = {
     // 入口の作品
     const ew = byNo.get(MUSEUM.entranceWork) || WORKS[0];
     $("#entrance-work").innerHTML = artwork(ew.no, "white", { cls: "work--entrance" });
-    $("#now-on-view").innerHTML = `<span class="nov-kicker">NOW ON VIEW</span>特別展「${esc(EXHIBITION.ja)}」<span class="nov-period">${esc(EXHIBITION.period)}</span>`;
+    $("#now-on-view").innerHTML = `<span class="nov-kicker">NOW ON VIEW</span>特別展「${esc(EXHIBITION.name)}」${esc(EXHIBITION.ja)}<span class="nov-period">${esc(EXHIBITION.period)}</span>`;
 
     // 回廊の送り
     $$(".corridor-step").forEach((b) => b.addEventListener("click", () => {

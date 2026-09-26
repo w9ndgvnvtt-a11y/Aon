@@ -8,11 +8,11 @@ HTML / CSS / JavaScript のみで動き、ビルドや外部ライブラリは�
 ```
 ENTRANCE（入口）
   → CENTRAL HALL（中央ホール：代表作 1〜3 点）
-  → ROOM 01 LIGHT（大型作品を一面に一点）
-  → ROOM 02 PEOPLE（小品をまとめて掛けるサロン掛け）
-  → ROOM 03 LANDSCAPE（横長作品の回廊）
-  → ROOM 04 OBJECTS（大きな余白に一点ずつ）
-  → SPECIAL EXHIBITION（特別展：2点ずつ対に）
+  → ROOM 01 SKY 空（大型作品を一面に一点）
+  → ROOM 02 SIGNS 空に立つもの（小品をまとめて掛けるサロン掛け）
+  → ROOM 03 COASTLINE 海沿い（回廊に連続して）
+  → ROOM 04 SMALL THINGS 小さなもの（大きな余白に一点ずつ）
+  → SPECIAL EXHIBITION「-blur-」にじむ夜（特別展：2点ずつ対に）
   → ARCHIVE（収蔵品目録）
   → JOURNAL（館内記録）
   → ABOUT（この館について／写真家／受付）
@@ -34,8 +34,8 @@ images/
   hall/        入口・中央ホールの作品
   room01/ 〜 room04/   各展示室の作品
   exhibition/  特別展の作品
-  archive/     収蔵庫だけにある作品
-scripts/make_placeholders.py   仮の画像を作るスクリプト（本番では不要）
+  archive/     収蔵庫だけにある作品（京都の寺社、夜の街、建築など）
+tools/crop_from_screenshots.py   Instagram のスクリーンショットから仮の画像を切り出したスクリプト（本番では不要）
 ```
 
 ## 写真の差し替え方
@@ -43,7 +43,9 @@ scripts/make_placeholders.py   仮の画像を作るスクリプト（本番で�
 1. 写真（JPG 推奨、長辺 2400px 前後）を `images/` の該当フォルダに入れる
 2. `script.js` 先頭の `WORKS` で、その作品の `src` を書き換える
    （例：`src: "images/room01/005.jpg"`）。タイトル・制作年・技法・解説もここで編集します
-3. 今入っている `.svg` の画像はすべて仮のものです。差し替えたら削除して構いません
+3. 今入っている `.jpg` は Instagram のスクリーンショットから切り出した仮の画像です（解像度が低め）。
+   元の写真データに同じファイル名で上書きすれば、そのまま高画質になります
+4. 制作年は分からないため `"n.d."`（制作年不詳）にしています。分かるものは数字に書き換えてください
 
 ## 展示替え
 
