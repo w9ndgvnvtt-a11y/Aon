@@ -12,7 +12,6 @@ const MUSEUM = {
   photographer: "AON",
   hours: { open: "10:00", close: "18:00", timeZone: "Asia/Tokyo" },
   email: "hello@example.com",
-  entranceWork: "001", // 入口に展示する作品（収蔵番号）
 };
 
 /* ---------------------------------------------------------------------
@@ -122,8 +121,8 @@ const ROOMS = [
   {
     id: "room03", no: "ROOM 03", name: "COASTLINE", ja: "海沿い",
     layout: "corridor", frame: "none",
-    text: "海沿いを走る電車、浜辺に停めた車、線路の向こうの海。回廊を横に歩くように、海辺の線路をたどってください。",
-    works: ["016", "017", "018", "019", "020"],
+    text: "海に浮かぶ島、海沿いを走る電車、浜辺に停めた車、線路の向こうの海。回廊を横に歩くように、海辺の線路をたどってください。",
+    works: ["001", "016", "017", "018", "019", "020"],
     map: { x: 4, y: 0, w: 4, h: 3 },
   },
   {
@@ -299,22 +298,12 @@ const PLACES = {
     }).join("");
     $("#galleries").innerHTML = html;
 
-    // 入口の作品
-    const ew = byNo.get(MUSEUM.entranceWork) || WORKS[0];
-    $("#entrance-work").innerHTML = artwork(ew.no, "white", { cls: "work--entrance" });
     $("#now-on-view").innerHTML = `<span class="nov-kicker">NOW ON VIEW</span>特別展「${esc(EXHIBITION.name)}」${esc(EXHIBITION.ja)}<span class="nov-period">${esc(EXHIBITION.period)}</span>`;
 
     // 回廊の送り
     $$(".corridor-step").forEach((b) => b.addEventListener("click", () => {
-      const wall = b.closest(".wall--corridor");
-      const track = wall.querySelector(".corridor-track");
-      const dir = Number(b.dataset.dir);
-      if (document.documentElement.classList.contains("walk")) {
-        const n = track.querySelectorAll(".work").length || 1;
-        window.scrollBy({ top: dir * (wall._dist || track.clientWidth) / (n - 1 || 1), behavior: "smooth" });
-      } else {
-        track.scrollBy({ left: dir * track.clientWidth * 0.8, behavior: reduceMotion ? "auto" : "smooth" });
-      }
+      const track = b.closest(".wall--corridor").querySelector(".corridor-track");
+      track.scrollBy({ left: Number(b.dataset.dir) * track.clientWidth * 0.8, behavior: reduceMotion ? "auto" : "smooth" });
     }));
   }
 
@@ -322,11 +311,11 @@ const PLACES = {
   let catalogueFilter = "all";
   function renderCatalogue() {
     const rows = WORKS.filter((w) => {
-      const onView = locationOf.has(w.no) || w.no === MUSEUM.entranceWork;
+      const onView = locationOf.has(w.no);
       return catalogueFilter === "all" || (catalogueFilter === "view" ? onView : !onView);
     });
     $("#catalogue-body").innerHTML = rows.map((w) => {
-      const loc = w.no === MUSEUM.entranceWork ? { no: "ENTRANCE" } : locationOf.get(w.no);
+      const loc = locationOf.get(w.no);
       const where = loc ? `<span class="loc loc--view">${esc(loc.id === "exhibition" ? "SPECIAL EXH." : loc.no)}</span>` : `<span class="loc">収蔵庫</span>`;
       return `<tr data-open="${esc(w.no)}" data-list="catalogue">
         <td class="c-no">${esc(w.no)}</td>
@@ -432,10 +421,10 @@ const PLACES = {
 
     const ent = center(lobby);
     const entY = (lobby.y + lobby.h) * U;
-    $("#map-plan").innerHTML = `
+    const svg = (key) => `
       <svg viewBox="${-pad} ${-pad} ${W + pad * 2} ${H + pad * 2 + 30}" role="img" aria-label="館内案内図">
-        <defs><pattern id="grid" width="${U / 2}" height="${U / 2}" patternUnits="userSpaceOnUse"><path d="M${U / 2} 0H0V${U / 2}" class="plan-grid"/></pattern></defs>
-        <rect x="${-pad}" y="${-pad}" width="${W + pad * 2}" height="${H + pad * 2 + 30}" fill="url(#grid)"/>
+        <defs><pattern id="grid-${key}" width="${U / 2}" height="${U / 2}" patternUnits="userSpaceOnUse"><path d="M${U / 2} 0H0V${U / 2}" class="plan-grid"/></pattern></defs>
+        <rect x="${-pad}" y="${-pad}" width="${W + pad * 2}" height="${H + pad * 2 + 30}" fill="url(#grid-${key})"/>
         ${rooms}
         <rect x="0" y="0" width="${W}" height="${H}" class="plan-outer"/>
         ${doorMarks}
@@ -444,8 +433,19 @@ const PLACES = {
         <path d="M${ent.x + 22},${entY} A22,22 0 0 0 ${ent.x},${entY + 22}" class="plan-swing"/>
         <text x="${ent.x}" y="${entY + 44}" class="plan-sub">ENTRANCE / EXIT</text>
         <path d="${path}" class="plan-route"/>
-        <g class="plan-here" id="plan-here"><circle r="9"/><circle r="16" class="ring"/></g>
+        <g class="plan-here"><circle r="9"/><circle r="16" class="ring"/><text y="-24" class="plan-here-label">現在地</text></g>
       </svg>`;
+    $("#map-plan").innerHTML = svg("dialog");
+    const intro = $("#intro-plan");
+    if (intro) {
+      intro.innerHTML = svg("intro");
+      const hall = routeById.get("central-hall");
+      if (hall && hall.map) {
+        const c = center(hall.map);
+        intro.style.setProperty("--zoom-x", `${((c.x + pad) / (W + pad * 2)) * 100}%`);
+        intro.style.setProperty("--zoom-y", `${((c.y + pad) / (H + pad * 2 + 30)) * 100}%`);
+      }
+    }
 
     $("#map-index").innerHTML = ROUTE.map((r, i) => `
       <li><a href="#${r.id}" data-goto="${r.id}" data-index="${r.id}">
@@ -454,7 +454,7 @@ const PLACES = {
         <span class="mi-ja">${esc(r.ja)}</span>
       </a></li>`).join("");
 
-    $$("#map-plan .plan-room").forEach((g) => {
+    $$(".plan-room").forEach((g) => {
       g.setAttribute("tabindex", "0");
       g.setAttribute("role", "link");
       const go = () => goTo(g.dataset.room);
@@ -467,9 +467,8 @@ const PLACES = {
     const r = routeById.get(id);
     const m = (r && r.map) || PLACES.entrance.map;
     const c = center(m);
-    const here = $("#plan-here");
-    if (here) here.setAttribute("transform", `translate(${c.x},${c.y + (id === "exit" ? m.h * U / 2 + 18 : -m.h * U / 2 + 22)})`);
-    $$("#map-plan .plan-room").forEach((g) => g.classList.toggle("is-here", g.dataset.room === id));
+    $$(".plan-here").forEach((here) => here.setAttribute("transform", `translate(${c.x},${c.y + (id === "exit" ? m.h * U / 2 + 18 : -m.h * U / 2 + 22)})`));
+    $$(".plan-room").forEach((g) => g.classList.toggle("is-here", g.dataset.room === id));
     $$("#map-index a").forEach((a) => a.toggleAttribute("aria-current", a.dataset.index === id));
   }
 
@@ -564,7 +563,7 @@ const PLACES = {
 
   function fillViewer(no) {
     const w = byNo.get(no);
-    const loc = no === MUSEUM.entranceWork ? { no: "ENTRANCE", ja: "入口" } : locationOf.get(no);
+    const loc = locationOf.get(no);
     vImg.src = w.src;
     vImg.alt = `${w.title}（${w.year}）`;
     $("#vl-no").textContent = `PHOTO ${w.no}`;
@@ -584,7 +583,7 @@ const PLACES = {
   function listFor(trigger, no) {
     if (trigger.dataset.list === "catalogue") return catalogueList.slice();
     const space = trigger.closest("[data-space]");
-    const list = space ? $$("[data-open]", space).filter((el) => el.classList.contains("frame")).map((el) => el.dataset.open) : [];
+    const list = space ? $$("[data-open]", space).filter((el) => el.classList.contains("frame") && el.offsetParent !== null).map((el) => el.dataset.open) : [];
     return list.length ? list : [no];
   }
 
@@ -631,7 +630,7 @@ const PLACES = {
     if (vList.length < 2) return;
     vIndex = (vIndex + d + vList.length) % vList.length;
     vSource = null;
-    const btn = document.querySelector(`.frame[data-open="${vList[vIndex]}"]`);
+    const btn = $$(`.frame[data-open="${vList[vIndex]}"]`).find((el) => el.offsetParent !== null);
     if (btn) { vSource = btn; lastFocus = btn; }
     viewer.classList.add("stepping");
     setTimeout(() => { fillViewer(vList[vIndex]); viewer.classList.remove("stepping"); }, reduceMotion ? 0 : 220);
@@ -768,129 +767,317 @@ const PLACES = {
     if (navigator.clipboard) navigator.clipboard.writeText(MUSEUM.email).then(done, fallback); else fallback();
   });
 
-  /* ---------------- 歩く（スクロールに合わせて館内が動く） ----------------
-     ・作品：遠くでは小さく傾き、正面に来るとまっすぐ大きくなり、通り過ぎると上へ抜ける
-     ・視線：歩くたびに、ごくわずかに上下左右に揺れる（止まると静まる）
-     ・床：歩いた分だけ床板が流れる
-     ・通路：扉に近づくと扉が大きくなり、くぐり抜ける
-     ・回廊（横長の部屋）：下へスクロールすると横へ歩く
-     「動きを減らす」設定の端末では何もしません。 */
+  /* ---------------- 歩く：展示室を 3D で歩き、作品の前で立ち止まる ----------------
+     ストリートビューのように、スクロールすると視点（カメラ）が部屋の中を進みます。
+       前を向いて歩く → 壁の作品へ向き直って近づく → 作品の前で立ち止まる → 次へ
+     ・ドラッグ（スマホは横スワイプ）で見回せます。手を離すと正面に戻ります
+     ・画面下の矢印で、前後の作品へ移動できます
+     ・掛け方（layout）ごとに、歩き方と作品の大きさが変わります
+         large：左右の壁に大きく交互　 salon：片側の壁に小品を並べて横歩き
+         corridor：反対側の壁に続けて横歩き　 solo：小さな作品を長い間隔で
+         pair：同じ場所で左右を振り返る　 hall：左右を見てから正面の壁の大作へ
+     「動きを減らす」設定の端末では、通常の縦に並んだ展示になります。 */
+  const SV_LAYOUT = {
+    large: (i) => ({ side: i % 2 ? "R" : "L", d: 1.25 + i * 1.0, h: 0.56, y: -0.02 }),
+    salon: (i) => ({ side: "L", d: 1.1 + i * 0.72, h: [0.4, 0.3, 0.36, 0.28][i % 4], y: [-0.05, 0.07, -0.09, 0.04][i % 4] }),
+    corridor: (i) => ({ side: "R", d: 1.1 + i * 0.95, h: 0.44, y: 0 }),
+    solo: (i) => ({ side: i % 2 ? "R" : "L", d: 1.35 + i * 1.6, h: 0.26, y: -0.03 }),
+    pair: (i) => ({ side: i % 2 ? "R" : "L", d: 1.2 + Math.floor(i / 2) * 1.3, h: 0.5, y: -0.02 }),
+  };
+
+  function planStops(g) {
+    if (g.layout === "hall") {
+      const [main, ...sides] = g.works;
+      const stops = sides.slice(0, 2).map((no, i) => ({ no, side: i ? "R" : "L", d: 1.15, h: 0.44, y: -0.02 }));
+      const len = 1.15 + 1.75;
+      stops.push({ no: main, side: "E", d: len - 1, h: 0.62, y: -0.03 });
+      return { stops, len };
+    }
+    const f = SV_LAYOUT[g.layout] || SV_LAYOUT.large;
+    const stops = g.works.map((no, i) => ({ no, ...f(i) }));
+    const len = Math.max(...stops.map((s) => s.d)) + 1.4;
+    return { stops, len };
+  }
+
+  // カメラの通り道（z：歩いた距離［壁までの距離を 1 とする単位］、yaw：向き［左 +90 / 右 -90］、w：スクロール量［画面の高さ単位］）
+  function planKeys(stops, len) {
+    const keys = [{ z: 0.15, yaw: 0, w: 0 }];
+    let cur = keys[0];
+    const push = (k) => { keys.push(k); cur = k; };
+    stops.forEach((s, i) => {
+      const yaw = s.side === "L" ? 90 : s.side === "R" ? -90 : 0;
+      const z = s.d;
+      const dz = Math.abs(z - cur.z);
+      if (cur.yaw === yaw && cur.stop !== undefined) {
+        push({ z, yaw, w: 0.35 + dz * 0.4 });                    // 同じ壁に沿って横へ歩く
+      } else if (dz > 0.35) {
+        push({ z: z - 0.3, yaw: 0, w: 0.3 + dz * 0.4 });         // 前を向いて歩く
+        push({ z, yaw, w: 0.45 });                               // 作品へ向き直る
+      } else {
+        push({ z, yaw, w: 0.5 });                                // その場で振り返る
+      }
+      push({ z, yaw, w: 0.55, stop: i });                        // 立ち止まって見る
+    });
+    push({ z: len - 0.55, yaw: 0, w: 0.3 + Math.abs(len - 0.55 - cur.z) * 0.4 });
+    push({ z: len - 0.55, yaw: 0, w: 0.3, end: true });
+    return keys;
+  }
+
+  const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const clampN = (v, a, b) => Math.min(b, Math.max(a, v));
+
+  function buildScene(g) {
+    const section = document.getElementById(g.id);
+    if (!section) return null;
+    const { stops, len } = planStops(g);
+    const keys = planKeys(stops, len);
+    const total = keys.reduce((a, k) => a + k.w, 0);
+    const idx = ROUTE.findIndex((r) => r.id === g.id);
+    const next = ROUTE[idx + 1];
+    const chevron = (d) => `<svg viewBox="0 0 40 24" aria-hidden="true"><path d="${d}"/></svg>`;
+
+    const el = document.createElement("div");
+    el.className = `sv sv--${g.layout}`;
+    el.innerHTML = `
+      <div class="sv-sticky">
+        <div class="sv-view">
+          <div class="sv-world">
+            <div class="sv-plane sv-floor"></div>
+            <div class="sv-plane sv-ceil"><span></span><span></span></div>
+            <div class="sv-plane sv-wall sv-left"></div>
+            <div class="sv-plane sv-wall sv-right"></div>
+            <div class="sv-plane sv-wall sv-end">
+              ${next ? `<a class="sv-door" href="#${next.id}" data-goto="${next.id}"><span class="sv-door-kicker">NEXT</span><span class="sv-door-name">${esc(next.sub ? `${next.label} — ${next.sub}` : next.label)}</span><span class="sv-door-ja">${esc(next.ja)}</span></a>` : ""}
+            </div>
+          </div>
+        </div>
+        <div class="sv-shade" aria-hidden="true"></div>
+        <div class="sv-hud">
+          <div class="sv-card"><p class="sv-room">${esc(g.no)}${g.id === "central-hall" ? "" : ` — ${esc(g.name)}`}<span>${esc(g.ja)}</span></p><p class="sv-now" aria-live="polite"></p></div>
+          <div class="sv-nav">
+            <button type="button" class="sv-arrow" data-dir="-1" aria-label="前の作品へ戻る">${chevron("M4 20 L20 6 L36 20")}</button>
+            <span class="sv-count"></span>
+            <button type="button" class="sv-arrow" data-dir="1" aria-label="次の作品へ進む">${chevron("M4 4 L20 18 L36 4")}</button>
+          </div>
+          <div class="sv-compass" aria-hidden="true"><span class="sv-needle"></span><span class="sv-n">N</span></div>
+          <p class="sv-hint">スクロールで進む ・ ドラッグで見回す</p>
+        </div>
+      </div>`;
+    $(".room-sign", section).after(el);
+
+    const walls = { L: $(".sv-left", el), R: $(".sv-right", el), E: $(".sv-end", el) };
+    const items = stops.map((s, i) => {
+      const wrap = document.createElement("div");
+      wrap.className = "sv-work";
+      wrap.innerHTML = artwork(s.no, g.frame);
+      $(".work", wrap).classList.add("lit");
+      $("img", wrap).loading = "eager";
+      walls[s.side].appendChild(wrap);
+      if (s.side === "E") walls.E.classList.add("has-work");
+      return { ...s, el: wrap, i };
+    });
+
+    return {
+      g, el, section, stops: items, keys, total, len,
+      sticky: $(".sv-sticky", el), view: $(".sv-view", el), world: $(".sv-world", el), shade: $(".sv-shade", el),
+      floor: $(".sv-floor", el), ceil: $(".sv-ceil", el), walls,
+      now: $(".sv-now", el), count: $(".sv-count", el), needle: $(".sv-needle", el), hint: $(".sv-hint", el),
+      focus: -2, top: 0, height: 0, lastZ: null, walked: 0, activity: 0,
+    };
+  }
+
   function initWalk() {
-    if (reduceMotion) return;
+    if (reduceMotion || !(window.CSS && CSS.supports("transform-style", "preserve-3d"))) return;
     root.classList.add("walk");
-    const museumEl = $("#museum");
-    const header = () => $("#signage").getBoundingClientRect().height;
-    const STEP = 360; // 一歩ぶんのスクロール量（px）
+    const scenes = GALLERIES.map(buildScene).filter(Boolean);
+    const passages = $$(".passage").map((el) => ({ el, door: $(".passage-door", el), text: $(".passage-text", el), top: 0, h: 0 }));
+    const intro = $("#entrance");
+    const introPlan = $("#intro-plan");
+    const signs = $$(".room-sign .sign-name").map((el) => ({ el, top: 0, h: 0 }));
+    let vw = 0, vh = 0, H = 0, P = 0, D = 0, kD = 1, headerH = 0, introH = 0;
+    let look = { yaw: 0, pitch: 0, tYaw: 0, tPitch: 0 };
+    let running = false, lastHalf = null;
 
-    const works = $$(".work").filter((w) => !w.closest(".wall--corridor") && !w.closest(".entrance"));
-    const signs = $$(".room-sign .sign-name");
-    const passages = $$(".passage");
-    const corridors = $$(".wall--corridor");
-    const floors = $$(".baseboard");
-    const entFloor = $(".entrance .floor");
-    const entWall = $(".entrance-wall");
-    const ceiling = $(".entrance .ceiling");
-    const entrance = $("#entrance");
-
-    // 回廊の長さは作品の幅で決まるので、回廊の写真だけは先に読み込んでおく
-    corridors.forEach((c) => $$("img", c).forEach((img) => (img.loading = "eager")));
-
-    let cache = [];
-    function measure() {
-      const sy = window.scrollY;
-      [...works, ...signs].forEach((el) => (el.style.transform = ""));
-      corridors.forEach((c) => {
-        const track = $(".corridor-track", c);
-        track.style.transform = "";
-        const last = track.lastElementChild;
-        const pad = parseFloat(getComputedStyle(track).paddingRight) || 0;
-        const dist = last ? Math.max(0, last.offsetLeft + last.offsetWidth + pad - track.clientWidth) : 0;
-        c._dist = dist;
-        c.style.height = `calc(${dist}px + 100svh)`;
+    function layout() {
+      vw = window.innerWidth; vh = window.innerHeight;
+      headerH = $("#signage").getBoundingClientRect().height;
+      H = vh - headerH; P = H;
+      kD = clampN(vw / H, 0.55, 1);            // 狭い画面では、壁までの距離を縮める
+      D = P * kD;
+      const fy = 0.43 * H * kD, cy = 0.47 * H * kD, E = D * 0.9;
+      const narrow = vw < 700;
+      scenes.forEach((s) => {
+        const L = s.len * D;
+        s.el.classList.toggle("sv-narrow", narrow);
+        s.el.style.height = `${s.total * vh + H}px`;
+        s.view.style.perspective = `${P}px`;
+        const set = (el, w, h, t) => { el.style.width = `${w}px`; el.style.height = `${h}px`; el.style.transform = t; };
+        set(s.floor, 2 * D, L + E, `translate3d(${-D}px, ${fy}px, ${E}px) rotateX(-90deg)`);
+        set(s.ceil, 2 * D, L + E, `translate3d(${-D}px, ${-cy}px, ${E}px) rotateX(-90deg)`);
+        set(s.walls.L, L + E, fy + cy, `translate3d(${-D}px, ${-cy}px, ${E}px) rotateY(90deg)`);
+        set(s.walls.R, L + E, fy + cy, `translate3d(${D}px, ${-cy}px, ${-L}px) rotateY(-90deg)`);
+        set(s.walls.E, 2 * D, fy + cy, `translate3d(${-D}px, ${-cy}px, ${-L}px)`);
+        s.stops.forEach((st) => {
+          const x = st.side === "L" ? E + st.d * D : st.side === "R" ? L - st.d * D : D;
+          st.el.style.left = `${x}px`;
+          st.el.style.top = `${cy + st.y * H * kD}px`;
+          st.el.style.setProperty("--h", `${st.h * H * kD * (narrow ? 0.62 : 1)}px`);
+          st.el.style.setProperty("--wmax", `${(narrow ? 0.64 : 0.5) * vw * kD}px`);
+        });
       });
-      const at = (el) => { const r = el.getBoundingClientRect(); return { el, top: r.top + sy, h: r.height }; };
-      cache = {
-        works: works.map(at),
-        signs: signs.map(at),
-        passages: passages.map(at),
-        corridors: corridors.map(at),
-        entranceH: entrance.offsetHeight,
-      };
-      frame(true);
+      const sy = window.scrollY;
+      scenes.forEach((s) => { const r = s.el.getBoundingClientRect(); s.top = r.top + sy; s.height = r.height; });
+      passages.forEach((p) => { const r = p.el.getBoundingClientRect(); p.top = r.top + sy; p.h = r.height; });
+      signs.forEach((t) => { t.el.style.transform = ""; const r = t.el.getBoundingClientRect(); t.top = r.top + sy; t.h = r.height; });
+      introH = intro ? intro.offsetHeight : 0;
+      scenes.forEach((s) => (s.focus = -2));
+      frame();
     }
 
-    let lastY = window.scrollY, activity = 0, lastStep = Math.floor(lastY / (STEP / 2)), running = false;
-    const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-
-    function frame(force) {
-      const sy = window.scrollY, vh = window.innerHeight, vc = sy + vh / 2;
-      const v = sy - lastY; lastY = sy;
-      activity += (Math.min(1, Math.abs(v) / 12) - activity) * 0.12;
-
-      // 視線の揺れ（歩行のリズム）
-      const phase = sy / STEP;
-      const bob = Math.sin(phase * Math.PI * 2) * 3.2 * activity;
-      const sway = Math.sin(phase * Math.PI) * 1.6 * activity;
-      museumEl.style.transform = activity > 0.01 ? `translate3d(${sway.toFixed(2)}px, ${bob.toFixed(2)}px, 0)` : "";
-
-      // 足音：半歩ごと
-      const half = Math.floor(sy / (STEP / 2));
-      if (half !== lastStep) { if (activity > 0.2) playStep(Math.min(1, activity)); lastStep = half; }
-
-      // 作品に近づき、通り過ぎる
-      for (const it of cache.works) {
-        const d = (it.top + it.h / 2 - vc) / vh;
-        if (Math.abs(d) > 1.4 && !force) continue;
-        const a = clamp(d, -1.2, 1.2);
-        const s = 1 - 0.1 * Math.min(1, a * a * 1.6);
-        it.el.style.transform = `perspective(1400px) translate3d(0, ${(-a * 46).toFixed(1)}px, ${(-Math.abs(a) * 60).toFixed(1)}px) rotateX(${(a * 7).toFixed(2)}deg) scale(${s.toFixed(4)})`;
+    function camera(s, u) {
+      let acc = 0;
+      for (let i = 1; i < s.keys.length; i++) {
+        const a = s.keys[i - 1], b = s.keys[i];
+        if (u <= acc + b.w || i === s.keys.length - 1) {
+          const t = b.w ? ease(clampN((u - acc) / b.w, 0, 1)) : 1;
+          const hold = b.stop !== undefined && a.z === b.z && a.yaw === b.yaw ? b.stop : (t > 0.92 && s.keys[i + 1] && s.keys[i + 1].stop !== undefined ? s.keys[i + 1].stop : -1);
+          return { z: a.z + (b.z - a.z) * t, yaw: a.yaw + (b.yaw - a.yaw) * t, stop: hold, end: !!b.end && t > 0.5, start: i === 1 && t < 0.4 };
+        }
+        acc += b.w;
       }
-      // 部屋の名前：歩くと横に流れていく
-      for (const it of cache.signs) {
-        const d = (it.top + it.h / 2 - vc) / vh;
-        if (Math.abs(d) > 1.5 && !force) continue;
-        it.el.style.transform = `translate3d(${(clamp(d, -1.5, 1.5) * 70).toFixed(1)}px, 0, 0)`;
+      return { z: 0, yaw: 0, stop: -1 };
+    }
+
+    function holdScroll(s, stopIndex) {
+      let acc = 0;
+      for (let i = 1; i < s.keys.length; i++) {
+        acc += s.keys[i].w;
+        if (s.keys[i].stop === stopIndex && s.keys[i - 1].z === s.keys[i].z && s.keys[i - 1].yaw === s.keys[i].yaw) {
+          const u = acc - s.keys[i].w / 2;
+          return s.top - headerH + (u / s.total) * (s.height - H);
+        }
+      }
+      return null;
+    }
+
+    function frame() {
+      const sy = window.scrollY;
+      look.yaw += (look.tYaw - look.yaw) * 0.14;
+      look.pitch += (look.tPitch - look.pitch) * 0.14;
+      let busy = Math.abs(look.tYaw - look.yaw) > 0.05 || Math.abs(look.tPitch - look.pitch) > 0.05;
+
+      for (const s of scenes) {
+        if (sy + vh < s.top - vh * 0.5 || sy > s.top + s.height + vh * 0.5) continue;
+        const prog = clampN((sy + headerH - s.top) / Math.max(1, s.height - H), 0, 1);
+        const cam = camera(s, prog * s.total);
+        const zpx = cam.z * D;
+        // 歩行のリズム（上下の揺れ）と足音
+        const dz = s.lastZ === null ? 0 : Math.abs(zpx - s.lastZ);
+        s.lastZ = zpx;
+        s.walked += dz;
+        s.activity += (Math.min(1, dz / 9) - s.activity) * 0.18;
+        if (s.activity > 0.01) busy = true;
+        const bob = Math.sin((s.walked / (D * 0.55)) * Math.PI * 2) * 5 * s.activity * kD;
+        const half = Math.floor(s.walked / (D * 0.275));
+        if (lastHalf !== null && half !== lastHalf && s.activity > 0.25) playStep(Math.min(1, s.activity));
+        lastHalf = half;
+
+        const yaw = cam.yaw + look.yaw;
+        s.world.style.transform = `translateZ(${P}px) rotateX(${look.pitch.toFixed(2)}deg) rotateY(${(-yaw).toFixed(2)}deg) translate3d(0, ${(-bob).toFixed(2)}px, ${zpx.toFixed(1)}px)`;
+        s.shade.style.opacity = (0.15 + s.activity * 0.35).toFixed(3);
+        s.needle.style.transform = `rotate(${yaw.toFixed(1)}deg)`;
+
+        if (cam.stop !== s.focus || s._end !== cam.end) {
+          s.focus = cam.stop; s._end = cam.end;
+          s.stops.forEach((st) => st.el.classList.toggle("is-focus", st.i === cam.stop));
+          if (cam.stop >= 0) {
+            const w = byNo.get(s.stops[cam.stop].no);
+            s.now.innerHTML = `<b>PHOTO ${esc(w.no)}</b>「${esc(w.title)}」<span>${esc(w.year)}</span>`;
+          } else if (cam.end) {
+            s.now.textContent = "この部屋の展示はここまで。扉の先が次の展示室です。";
+          } else {
+            s.now.textContent = prog < 0.02 ? "展示室に入りました。スクロールで進みます。" : "次の作品へ歩いています…";
+          }
+          const shown = cam.stop >= 0 ? cam.stop + 1 : s.stops.filter((st) => (holdScroll(s, st.i) ?? 0) <= sy + 1).length;
+          s.count.textContent = `${shown} / ${s.stops.length}`;
+        }
+        s.hint.classList.toggle("off", prog > 0.04);
+      }
+
+      // 部屋の名前：歩くと横に流れる
+      for (const t of signs) {
+        const d = (t.top + t.h / 2 - (sy + vh / 2)) / vh;
+        if (Math.abs(d) < 1.6) t.el.style.transform = `translate3d(${(clampN(d, -1.5, 1.5) * 60).toFixed(1)}px, 0, 0)`;
       }
       // 通路：扉が近づいてきて、くぐる
-      for (const it of cache.passages) {
-        const p = clamp((sy + vh - it.top) / (it.h + vh), 0, 1);
-        const door = $(".passage-door", it.el), text = $(".passage-text", it.el);
-        const k = Math.max(0, p - 0.25) / 0.75;
-        door.style.transform = `translateX(-50%) scale(${(1 + k * k * 5.5).toFixed(3)})`;
-        door.style.opacity = (1 - Math.max(0, k - 0.7) / 0.3).toFixed(3);
-        text.style.transform = `scale(${(1 + k * 0.25).toFixed(3)})`;
-        text.style.opacity = (1 - Math.max(0, k - 0.45) / 0.35).toFixed(3);
+      for (const p of passages) {
+        const q = clampN((sy + vh - p.top) / (p.h + vh), 0, 1);
+        const k = Math.max(0, q - 0.25) / 0.75;
+        p.door.style.transform = `translateX(-50%) scale(${(1 + k * k * 5.5).toFixed(3)})`;
+        p.door.style.opacity = (1 - Math.max(0, k - 0.7) / 0.3).toFixed(3);
+        p.text.style.transform = `scale(${(1 + k * 0.25).toFixed(3)})`;
+        p.text.style.opacity = (1 - Math.max(0, k - 0.45) / 0.35).toFixed(3);
       }
-      // 回廊：縦に歩くと、横へ進む
-      const hh = header();
-      for (const it of cache.corridors) {
-        const dist = it.el._dist || 0;
-        const q = dist ? clamp((sy + hh - it.top) / dist, 0, 1) : 0;
-        $(".corridor-track", it.el).style.transform = `translate3d(${(-q * dist).toFixed(1)}px, 0, 0)`;
-        $(".corridor-progress span", it.el).style.transform = `scaleX(${q.toFixed(4)})`;
-      }
-      // 床板
-      floors.forEach((f) => (f.style.backgroundPositionX = `${(-sy * 0.55).toFixed(1)}px`));
-      // 入口：奥へ歩いて入っていく
-      if (sy < cache.entranceH * 1.2 || force) {
-        const e = clamp(sy / (cache.entranceH * 0.85), 0, 1);
-        entWall.style.transform = `translate3d(0, ${(e * 40).toFixed(1)}px, 0) scale(${(1 + e * 0.16).toFixed(4)})`;
-        ceiling.style.transform = `translate3d(0, ${(-e * 70).toFixed(1)}px, 0)`;
-        if (entFloor) entFloor.style.setProperty("--walk", (sy * 1.4).toFixed(1));
+      // 入口の案内図：下へ進むと、中央ホールへ吸い込まれるように近づく
+      if (introPlan && sy < introH * 1.2) {
+        const e = clampN(sy / (introH * 0.9), 0, 1);
+        introPlan.style.transform = `scale(${(1 + e * e * 2.2).toFixed(4)})`;
+        introPlan.style.opacity = (1 - Math.max(0, e - 0.55) / 0.45).toFixed(3);
       }
 
-      if (activity > 0.005 || Math.abs(v) > 0.5) requestAnimationFrame(() => frame(false));
-      else { running = false; museumEl.style.transform = ""; }
+      if (busy) requestAnimationFrame(frame); else running = false;
     }
-    function kick() { if (!running) { running = true; requestAnimationFrame(() => frame(false)); } }
+    const kick = () => { if (!running) { running = true; requestAnimationFrame(frame); } };
+
+    // 見回す：ドラッグ（スマホは横スワイプ）。離すと正面に戻る
+    scenes.forEach((s) => {
+      let start = null;
+      s.view.addEventListener("pointerdown", (e) => { start = { x: e.clientX, y: e.clientY, id: e.pointerId, dragging: false }; });
+      s.view.addEventListener("pointermove", (e) => {
+        if (!start || e.pointerId !== start.id) return;
+        const dx = e.clientX - start.x, dy = e.clientY - start.y;
+        if (!start.dragging && Math.hypot(dx, dy) > 6) { start.dragging = true; s.view.setPointerCapture(e.pointerId); s.view.classList.add("dragging"); }
+        if (start.dragging) {
+          look.tYaw = clampN(dx * 0.14, -55, 55);
+          look.tPitch = e.pointerType === "touch" ? 0 : clampN(-dy * 0.06, -12, 12);
+          kick();
+        }
+      });
+      const end = (e) => {
+        if (start && start.dragging) {
+          // ドラッグの直後に作品が開かないようにする
+          s.view.addEventListener("click", (ev) => { ev.stopPropagation(); ev.preventDefault(); }, { capture: true, once: true });
+        }
+        start = null; look.tYaw = 0; look.tPitch = 0; s.view.classList.remove("dragging"); kick();
+      };
+      s.view.addEventListener("pointerup", end);
+      s.view.addEventListener("pointercancel", end);
+      $$(".sv-arrow", s.el).forEach((b) => b.addEventListener("click", () => {
+        const dir = Number(b.dataset.dir);
+        const sy = window.scrollY;
+        const targets = s.stops.map((st) => holdScroll(s, st.i)).filter((v) => v !== null);
+        const nextY = dir > 0 ? targets.find((y) => y > sy + 4) : [...targets].reverse().find((y) => y < sy - 4);
+        const fallback = dir > 0 ? s.top + s.height - H - headerH + 2 : s.top - headerH - vh * 0.6;
+        window.scrollTo({ top: nextY ?? fallback, behavior: "smooth" });
+      }));
+    });
+
+    // ← → キーでも作品を移動できる（作品を間近で見ているときを除く）
+    document.addEventListener("keydown", (e) => {
+      if (!$("#viewer").hidden || !$("#map").hidden || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
+      const s = scenes.find((sc) => window.scrollY + headerH >= sc.top - 2 && window.scrollY + headerH < sc.top + sc.height - H);
+      if (!s) return;
+      e.preventDefault();
+      $(`.sv-arrow[data-dir="${e.key === "ArrowRight" ? 1 : -1}"]`, s.el).click();
+    });
 
     window.addEventListener("scroll", kick, { passive: true });
     let rt = null;
-    const remeasure = () => { clearTimeout(rt); rt = setTimeout(measure, 120); };
-    window.addEventListener("resize", remeasure);
-    window.addEventListener("load", remeasure);
-    $$("#museum img").forEach((img) => { if (!img.complete) img.addEventListener("load", remeasure, { once: true }); });
-    measure();
+    const relayout = () => { clearTimeout(rt); rt = setTimeout(layout, 120); };
+    window.addEventListener("resize", relayout);
+    window.addEventListener("load", relayout);
+    $$("#museum img").forEach((img) => { if (!img.complete) img.addEventListener("load", relayout, { once: true }); });
+    layout();
   }
 
   /* ---------------- 起動 ---------------- */

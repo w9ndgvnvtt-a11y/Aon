@@ -37,26 +37,27 @@
   </header>
 
   <main id="museum">
-    <!-- ENTRANCE -->
-    <section class="space entrance" id="entrance" data-space="entrance" aria-label="エントランス">
-      <div class="ceiling" aria-hidden="true"><span></span><span></span><span></span></div>
-      <div class="entrance-wall">
-        <div class="entrance-lettering">
-          <p class="lettering-en">AON <br>PHOTOGRAPH <br>MUSEUM</p>
+    <!-- ENTRANCE：まず館内案内図を見てから入館する -->
+    <section class="space entrance" id="entrance" data-space="entrance" aria-label="エントランス（館内案内図）">
+      <div class="intro">
+        <div class="intro-text">
+          <p class="intro-kicker">FLOOR GUIDE — 館内案内図</p>
+          <h1 class="lettering-en">AON <br>PHOTOGRAPH <br>MUSEUM</h1>
           <p class="lettering-ja">AON 写真収蔵館</p>
           <dl class="hours-plate" id="hours-plate">
             <dt>開館時間</dt><dd id="hours-range">10:00 — 18:00</dd>
             <dt>入館料</dt><dd>無料</dd>
           </dl>
           <p class="closed-note" id="closed-note">MUSEUM CLOSED<br><span>ただいま閉館時間です。照明を落とした館内を、そのままご覧いただけます。</span></p>
+          <a class="now-on-view" id="now-on-view" href="#exhibition" data-goto="exhibition"></a>
+          <a class="enter-btn" href="#central-hall" data-goto="central-hall">入館する <span aria-hidden="true">→</span></a>
         </div>
-        <div class="entrance-work" id="entrance-work"></div>
+        <div class="intro-plan-wrap">
+          <div class="intro-plan" id="intro-plan"></div>
+          <p class="intro-plan-note">部屋を選ぶと、その展示室へ移動します</p>
+        </div>
       </div>
-      <div class="entrance-foot">
-        <a class="enter-btn" href="#central-hall" data-goto="central-hall">入館する <span aria-hidden="true">→</span></a>
-        <a class="now-on-view" id="now-on-view" href="#exhibition" data-goto="exhibition"></a>
-      </div>
-      <div class="floor" aria-hidden="true"></div>
+      <p class="intro-hint" aria-hidden="true">SCROLL<span></span></p>
     </section>
 
     <!-- CENTRAL HALL / ROOMS / SPECIAL EXHIBITION は script.js が生成 -->

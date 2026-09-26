@@ -731,32 +731,203 @@ body { overflow-x: clip; }
 @media (hover: none) { .vl-back kbd { display: none; } }
 
 /* ---------------------------------------------------------------------
-   歩く（script.js の initWalk が html に .walk を付けたときだけ）
+   ENTRANCE — 最初に館内案内図を見せる
    --------------------------------------------------------------------- */
-.walk .work { transform-origin: 50% 55%; }
-.walk .sign-name { will-change: transform; }
-.walk .passage-door { transform-origin: 50% 100%; transition: border-color .6s; }
-.walk .passage-text { transform-origin: 50% 50%; }
-
-/* 入口の床：歩いた分だけ床板の継ぎ目が手前へ流れる */
-.floor::before {
-  background:
-    repeating-linear-gradient(to bottom, transparent 0 236px, rgba(var(--shadow-rgb), .22) 236px 238px) 0 calc(var(--walk, 0) * 1px),
-    repeating-linear-gradient(90deg, var(--floor-1) 0 58px, var(--floor-2) 58px 60px, color-mix(in srgb, var(--floor-1) 85%, var(--floor-2)) 60px 118px, var(--floor-2) 118px 120px);
-}
-.walk .entrance-wall { transform-origin: 50% 40%; }
-
-/* 回廊：縦スクロールで横に歩く。舞台を画面に固定し、作品の列を横に送る */
-.walk .wall--corridor { padding: 0; }
-.walk .corridor-stage {
-  position: sticky; top: var(--header);
-  height: calc(100svh - var(--header));
-  display: flex; flex-direction: column; justify-content: center;
+.entrance {
+  display: grid; grid-template-rows: 1fr auto; min-height: max(640px, 100svh);
+  padding: calc(var(--header) + clamp(24px, 5vh, 56px)) var(--gutter) 24px;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--rule) 40%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--rule) 40%, transparent) 1px, transparent 1px),
+    var(--noise);
+  background-size: 24px 24px, 24px 24px, auto;
   overflow: hidden;
 }
-.walk .corridor-track { overflow: visible; scroll-snap-type: none; will-change: transform; }
-.walk .corridor-hint::after { content: "（スクロールで進む）"; margin-left: .4em; }
-.corridor-progress { display: none; width: min(160px, 30vw); height: 1px; background: var(--rule); position: relative; }
-.corridor-progress span { position: absolute; inset: 0; background: var(--ink); transform-origin: left; transform: scaleX(0); }
-.walk .corridor-progress { display: block; }
-@media (max-width: 760px) { .walk .corridor-hint { display: none; } }
+.intro {
+  display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.5fr); align-items: center;
+  gap: clamp(28px, 5vw, 80px); max-width: 1320px; width: 100%; margin: 0 auto;
+}
+.intro-text { display: grid; gap: 16px; justify-items: start; }
+.intro-kicker { margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: .22em; color: var(--ink-3); }
+.entrance .lettering-en { margin: 0; font-family: var(--sign); font-weight: 600; font-stretch: 125%; font-size: clamp(1.7rem, 3.4vw, 3rem); line-height: .98; letter-spacing: .01em; }
+.entrance .hours-plate { margin-top: 6px; }
+.entrance .now-on-view { border-left: 1px solid var(--rule); }
+.entrance .enter-btn { margin-top: 8px; }
+.intro-plan-wrap { display: grid; gap: 10px; }
+.intro-plan {
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  box-shadow: 0 1px 0 var(--rule), 0 24px 40px -30px rgba(var(--shadow-rgb), .5);
+  padding: clamp(8px, 1.5vw, 18px);
+  transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+}
+.intro-plan svg { display: block; width: 100%; height: auto; }
+.intro-plan-note { margin: 0; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; color: var(--ink-3); text-align: right; }
+.plan-here-label { font-family: var(--mincho); font-size: 11px; letter-spacing: .2em; text-anchor: middle; fill: var(--ink); }
+.intro-hint { margin: 0; justify-self: center; display: grid; justify-items: center; gap: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: var(--ink-3); }
+.intro-hint span { width: 1px; height: 36px; background: var(--ink-3); transform-origin: top; animation: hint 2.2s ease-in-out infinite; }
+@keyframes hint { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+/* 図面が描かれていく */
+.intro-plan .plan-room rect, .intro-plan .plan-outer { stroke-dasharray: 2000; stroke-dashoffset: 2000; animation: draw 2.2s cubic-bezier(.4,.1,.2,1) forwards; }
+.intro-plan .plan-room:nth-child(2n) rect { animation-delay: .15s; }
+.intro-plan .plan-room:nth-child(3n) rect { animation-delay: .3s; }
+.intro-plan .plan-outer { animation-delay: .5s; animation-duration: 2.6s; }
+.intro-plan .plan-room text, .intro-plan .plan-route, .intro-plan .plan-here { opacity: 0; animation: appear 1s ease 1.4s forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes appear { to { opacity: 1; } }
+
+@media (max-width: 860px) {
+  .intro { grid-template-columns: 1fr; gap: 22px; }
+  .intro-plan-wrap { order: -1; }
+  .intro-plan-note { text-align: left; }
+  .entrance .lettering-en { font-size: clamp(1.25rem, 5.6vw, 1.8rem); }
+  .entrance .lettering-en br { display: none; }
+  .intro-text { gap: 10px; }
+}
+
+/* ---------------------------------------------------------------------
+   3D の展示室（script.js の initWalk が html に .walk を付けたときだけ）
+   --------------------------------------------------------------------- */
+.walk .gallery > .wall, .walk .gallery > .baseboard { display: none; }
+.walk .gallery .room-sign {
+  min-height: calc(100svh - var(--header)); align-content: center;
+  padding-top: calc(var(--header) + 40px); padding-bottom: 40px;
+}
+.walk .sign-name { will-change: transform; }
+.walk .passage-door { transform-origin: 50% 100%; transition: border-color .6s; }
+
+.sv { position: relative; }
+.sv-sticky { position: sticky; top: var(--header); height: calc(100svh - var(--header)); overflow: hidden; }
+.sv-view {
+  position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: pan-y;
+  perspective-origin: 50% 50%;
+  background: var(--wall-shade);
+}
+.sv-view.dragging { cursor: grabbing; }
+.sv-world { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; will-change: transform; }
+.sv-plane { position: absolute; left: 0; top: 0; transform-origin: 0 0; transform-style: preserve-3d; }
+
+/* 壁：奥ほど暗く、床ぎわに巾木 */
+.sv-wall { background-color: var(--wall); background-image: var(--noise); }
+.sv-left, .sv-right { box-shadow: inset 0 -14px 0 var(--wall-shade); }
+.sv-left::after, .sv-right::after, .sv-end::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+.sv-left::after { background: linear-gradient(to right, transparent 30%, rgba(var(--shadow-rgb), .22)); }
+.sv-right::after { background: linear-gradient(to left, transparent 30%, rgba(var(--shadow-rgb), .22)); }
+.sv-end { box-shadow: inset 0 -14px 0 var(--wall-shade); }
+.sv-end::after { background: rgba(var(--shadow-rgb), .1); }
+
+/* 床：木の床板。奥ほど暗い */
+.sv-floor {
+  background:
+    linear-gradient(to bottom, transparent 20%, rgba(var(--shadow-rgb), .35)),
+    repeating-linear-gradient(to bottom, transparent 0 236px, rgba(var(--shadow-rgb), .18) 236px 238px),
+    repeating-linear-gradient(90deg, var(--floor-1) 0 58px, var(--floor-2) 58px 60px, color-mix(in srgb, var(--floor-1) 85%, var(--floor-2)) 60px 118px, var(--floor-2) 118px 120px);
+}
+/* 天井：照明レール */
+.sv-ceil { background: linear-gradient(to bottom, transparent, rgba(var(--shadow-rgb), .2)), var(--wall-shade); }
+.sv-ceil span { position: absolute; top: 0; bottom: 0; width: 4px; background: var(--ink); opacity: .55; }
+.sv-ceil span:nth-child(1) { left: 30%; }
+.sv-ceil span:nth-child(2) { right: 30%; }
+
+.gallery--hall .sv-wall { background-color: var(--stone); background-image: var(--cloud), var(--noise); }
+.gallery--special .sv-wall { background-color: var(--special); }
+.gallery--special .sv-view { background: #0c0f16; }
+
+/* 壁の作品 */
+.sv-work {
+  position: absolute; transform: translate(-50%, -50%) translateZ(2px);
+  transform-style: flat;
+}
+.sv-work::before { /* 天井からのスポット */
+  content: ""; position: absolute; left: -45%; right: -45%; top: -55%; bottom: -25%;
+  background: radial-gradient(ellipse 50% 52% at 50% 40%, var(--spot), transparent 72%);
+  opacity: .75; transition: opacity 1s ease; pointer-events: none;
+}
+.sv-work.is-focus::before { opacity: 1; }
+.sv-work .work { display: block; position: relative; }
+.sv-work .work::before { display: none; }
+.sv-work .frame { padding: calc(var(--h) * .02); transition: box-shadow .6s ease; }
+.sv-work .frame--none { padding: 0; }
+.sv-work .mat { padding: calc(var(--h) * .085); }
+.sv-work .frame--none .mat { padding: 0; }
+.sv-work .mat img { height: var(--h); width: auto; max-height: none; max-width: var(--wmax); object-fit: contain; }
+.sv-work .frame:hover { transform: none; }
+.sv-work .label {
+  position: absolute; left: calc(100% + var(--h) * .08); bottom: 0; width: calc(var(--h) * .5);
+  font-size: calc(var(--h) * .026); gap: 0; opacity: .55; transition: opacity .8s ease;
+}
+.sv-work .l-title { font-size: 1.3em; }
+.sv-work .l-no { margin-bottom: .5em; }
+.sv-work.is-focus .label { opacity: 1; }
+.sv-narrow .sv-work .label { left: 0; top: calc(100% + var(--h) * .05); bottom: auto; width: calc(var(--h) * .9); font-size: calc(var(--h) * .036); }
+
+/* 突き当たりの扉 */
+.sv-door {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+  width: 34%; height: 72%;
+  display: grid; align-content: center; justify-items: center; gap: .4em; text-align: center; text-decoration: none;
+  background: linear-gradient(to bottom, #1b1a18, #2a2926);
+  color: var(--on-dark); font-family: var(--sign); font-stretch: 118%; letter-spacing: .18em;
+  font-size: clamp(12px, 2.2vh, 22px);
+}
+.sv-door-kicker { font-family: var(--mono); font-size: .6em; letter-spacing: .3em; color: var(--on-dark-2); }
+.sv-door-ja { font-family: var(--mincho); font-size: .75em; color: var(--on-dark-2); }
+
+/* 歩いているあいだ、周辺がわずかに暗くなる */
+.sv-shade { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 55%, rgba(0,0,0,.45)); opacity: .15; }
+
+/* ストリートビューのような操作パネル */
+.sv-hud { position: absolute; inset: 0; pointer-events: none; font-family: var(--mono); color: var(--ink); }
+.sv-hud > * { pointer-events: auto; }
+.sv-card {
+  position: absolute; left: clamp(12px, 3vw, 32px); top: clamp(12px, 2.4vh, 24px);
+  max-width: min(360px, calc(100% - 24px));
+  background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  padding: 12px 16px; box-shadow: 0 8px 24px -12px rgba(0,0,0,.35);
+  display: grid; gap: 4px;
+}
+.sv-room { margin: 0; font-size: 10.5px; letter-spacing: .18em; color: var(--ink-3); }
+.sv-room span { font-family: var(--mincho); letter-spacing: .2em; margin-left: .8em; }
+.sv-now { margin: 0; font-family: var(--mincho); font-size: 14px; letter-spacing: .04em; line-height: 1.6; min-height: 1.6em; }
+.sv-now b { font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; margin-right: .4em; }
+.sv-now span { font-family: var(--mono); font-size: 11px; margin-left: .6em; color: var(--ink-3); }
+.sv-nav {
+  position: absolute; left: 50%; bottom: max(18px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  display: flex; align-items: center; gap: 14px;
+}
+.sv-arrow {
+  width: 54px; height: 40px; border-radius: 22px; border: 0; cursor: pointer;
+  background: rgba(255,255,255,.9); box-shadow: 0 6px 16px -6px rgba(0,0,0,.45);
+  display: grid; place-items: center; transition: transform .2s, background-color .2s;
+}
+.sv-arrow:hover { transform: translateY(-2px); background: #fff; }
+.sv-arrow svg { width: 26px; height: 16px; fill: none; stroke: #1b1b1a; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.sv-count { font-size: 11px; letter-spacing: .16em; background: rgba(255,255,255,.85); color: #1b1b1a; padding: 5px 10px; border-radius: 12px; font-variant-numeric: tabular-nums; }
+.sv-compass {
+  position: absolute; right: clamp(12px, 3vw, 32px); bottom: max(18px, env(safe-area-inset-bottom, 0px));
+  width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,.9); box-shadow: 0 6px 16px -6px rgba(0,0,0,.45);
+}
+.sv-needle { position: absolute; left: 50%; top: 50%; width: 6px; height: 30px; margin: -15px 0 0 -3px; background: linear-gradient(to bottom, #b33a2b 50%, #9b978f 50%); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.sv-n { position: absolute; left: 50%; top: 2px; transform: translateX(-50%); font-size: 8px; color: #6d6a63; }
+.sv-hint {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0;
+  background: rgba(20,20,18,.7); color: #eee; padding: 10px 16px; border-radius: 20px; font-size: 11px; letter-spacing: .14em; white-space: nowrap;
+  transition: opacity .6s ease; pointer-events: none;
+}
+.sv-hint.off { opacity: 0; }
+.gallery--special .sv-card { background: rgba(20, 24, 34, .82); color: var(--on-dark); }
+@media (max-width: 700px) {
+  .sv-card { padding: 10px 12px; }
+  .sv-now { font-size: 13px; }
+  .sv-compass { width: 38px; height: 38px; }
+  .sv-needle { height: 24px; margin-top: -12px; }
+}
+.sv-work .work { --h: inherit; --w: inherit; }
+.sv-end.has-work .sv-door { left: 88%; width: 16%; height: 58%; font-size: clamp(9px, 1.4vh, 14px); }
+.sv--salon .sv-work .label { left: 0; top: calc(100% + var(--h) * .06); bottom: auto; width: calc(var(--h) * 1.1); font-size: calc(var(--h) * .036); opacity: 0; }
+.sv--salon .sv-work.is-focus .label { opacity: 1; }
+.sv-count { white-space: nowrap; }
+@media (max-width: 860px) {
+  .entrance .now-on-view { border-left: 0; padding-left: 0; text-align: left; }
+}
