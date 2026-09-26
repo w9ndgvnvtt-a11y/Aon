@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AON — Photography</title>
+  <meta name="description" content="写真家 AON のポートフォリオ。ポートレート、風景、ストリート、コマーシャル撮影。">
+  <meta property="og:title" content="AON — Photography">
+  <meta property="og:description" content="写真家 AON のポートフォリオサイト">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="images/works/work-01.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Ccircle cx=%2232%22 cy=%2232%22 r=%2228%22 fill=%22none%22 stroke=%22%238a6d4b%22 stroke-width=%224%22/%3E%3Ccircle cx=%2232%22 cy=%2232%22 r=%2210%22 fill=%22%238a6d4b%22/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header" id="top">
+    <a class="logo" href="#top">AON<span>Photography</span></a>
+    <button class="nav-toggle" aria-label="メニューを開く" aria-expanded="false" aria-controls="nav">
+      <span></span><span></span>
+    </button>
+    <nav class="nav" id="nav">
+      <a href="#works">Works</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ヒーロー -->
+    <section class="hero">
+      <div class="hero-slides" aria-hidden="true"></div>
+      <div class="hero-text">
+        <p class="eyebrow">Photographer based in Tokyo</p>
+        <h1>光と時間の、<br>静かな記録。</h1>
+        <a class="btn" href="#works">作品を見る</a>
+      </div>
+      <a class="scroll-hint" href="#works" aria-label="下へスクロール">Scroll</a>
+    </section>
+
+    <!-- 作品 -->
+    <section class="section" id="works">
+      <div class="section-head">
+        <h2>Works</h2>
+        <p>作品</p>
+      </div>
+      <div class="filters" role="tablist" aria-label="カテゴリで絞り込み"></div>
+      <div class="gallery" id="gallery"></div>
+    </section>
+
+    <!-- プロフィール -->
+    <section class="section about" id="about">
+      <div class="about-photo">
+        <img src="images/works/work-07.svg" alt="写真家 AON のポートレート" loading="lazy">
+      </div>
+      <div class="about-body">
+        <div class="section-head left">
+          <h2>About</h2>
+          <p>プロフィール</p>
+        </div>
+        <h3>AON <small>／ 写真家</small></h3>
+        <p>東京を拠点に活動するフォトグラファー。人物・風景・街の断片を、自然光を中心とした静かなトーンで切り取る。雑誌、広告、ブランドのビジュアル制作のほか、個展・グループ展にも参加。</p>
+        <dl class="timeline">
+          <dt>2026</dt><dd>個展「余白の光」開催（東京）</dd>
+          <dt>2024</dt><dd>写真集『Quiet Hours』刊行</dd>
+          <dt>2022</dt><dd>フリーランスとして独立</dd>
+          <dt>2018</dt><dd>写真スタジオにてアシスタント</dd>
+        </dl>
+        <ul class="socials">
+          <li><a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a></li>
+          <li><a href="https://x.com/" target="_blank" rel="noopener">X</a></li>
+          <li><a href="https://note.com/" target="_blank" rel="noopener">note</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 撮影メニュー -->
+    <section class="section" id="services">
+      <div class="section-head">
+        <h2>Services</h2>
+        <p>撮影メニュー</p>
+      </div>
+      <div class="services">
+        <article class="service">
+          <h3>Portrait</h3>
+          <p>プロフィール写真、アーティスト写真、家族写真など。ロケーション撮影にも対応します。</p>
+          <p class="price">¥30,000〜</p>
+        </article>
+        <article class="service">
+          <h3>Commercial</h3>
+          <p>商品撮影、ブランドイメージ、Web・広告用ビジュアル。企画段階からご相談ください。</p>
+          <p class="price">¥80,000〜</p>
+        </article>
+        <article class="service">
+          <h3>Event / Wedding</h3>
+          <p>ウェディング、パーティー、イベントの記録撮影。当日の空気ごと残します。</p>
+          <p class="price">¥60,000〜</p>
+        </article>
+      </div>
+      <p class="note">※ 料金は目安です。内容・時間・納品点数によりお見積もりいたします。</p>
+    </section>
+
+    <!-- お問い合わせ -->
+    <section class="section contact" id="contact">
+      <div class="section-head">
+        <h2>Contact</h2>
+        <p>お問い合わせ</p>
+      </div>
+      <p class="contact-lead">撮影のご依頼・ご相談は、以下のフォームよりお気軽にご連絡ください。<br>通常 2〜3 営業日以内にご返信いたします。</p>
+      <form class="contact-form" id="contact-form">
+        <label>お名前<input type="text" name="name" required autocomplete="name"></label>
+        <label>メールアドレス<input type="email" name="email" required autocomplete="email"></label>
+        <label>ご依頼内容
+          <select name="type">
+            <option>ポートレート</option>
+            <option>コマーシャル</option>
+            <option>イベント / ウェディング</option>
+            <option>その他</option>
+          </select>
+        </label>
+        <label>メッセージ<textarea name="message" rows="6" required></textarea></label>
+        <button class="btn" type="submit">送信する</button>
+        <p class="form-status" role="status"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; <span id="year"></span> AON Photography. All rights reserved.</p>
+    <p class="small">掲載写真の無断転載・使用を禁じます。</p>
+  </footer>
+
+  <!-- ライトボックス -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="写真の拡大表示" hidden>
+    <button class="lb-close" aria-label="閉じる">&times;</button>
+    <button class="lb-prev" aria-label="前の写真">&#8249;</button>
+    <figure>
+      <img alt="">
+      <figcaption></figcaption>
+    </figure>
+    <button class="lb-next" aria-label="次の写真">&#8250;</button>
+  </div>
+
+  <script src="js/works.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
