@@ -794,7 +794,6 @@ body { overflow-x: clip; }
   min-height: calc(100svh - var(--header)); align-content: center;
   padding-top: calc(var(--header) + 40px); padding-bottom: 40px;
 }
-.walk .sign-name { will-change: transform; }
 .walk .passage-door { transform-origin: 50% 100%; transition: border-color .6s; }
 
 .sv { position: relative; }
@@ -883,7 +882,7 @@ body { overflow-x: clip; }
 .sv-card {
   position: absolute; left: clamp(12px, 3vw, 32px); top: clamp(12px, 2.4vh, 24px);
   max-width: min(360px, calc(100% - 24px));
-  background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
   padding: 12px 16px; box-shadow: 0 8px 24px -12px rgba(0,0,0,.35);
   display: grid; gap: 4px;
 }

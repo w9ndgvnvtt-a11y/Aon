@@ -864,6 +864,8 @@ const PLACES = {
         </div>
       </div>`;
     $(".room-sign", section).after(el);
+    // 3D の部屋は大きいので、近くにいるときだけ描く（スマホのメモリを使いすぎないように）
+    $(".sv-world", el).style.display = "none";
 
     const walls = { L: $(".sv-left", el), R: $(".sv-right", el), E: $(".sv-end", el) };
     const items = stops.map((s, i) => {
@@ -882,7 +884,7 @@ const PLACES = {
       sticky: $(".sv-sticky", el), view: $(".sv-view", el), world: $(".sv-world", el), shade: $(".sv-shade", el),
       floor: $(".sv-floor", el), ceil: $(".sv-ceil", el), walls,
       now: $(".sv-now", el), count: $(".sv-count", el), needle: $(".sv-needle", el), hint: $(".sv-hint", el),
-      focus: -2, top: 0, height: 0, lastZ: null, walked: 0, activity: 0,
+      focus: -2, top: 0, height: 0, lastZ: null, walked: 0, activity: 0, shown: false,
     };
   }
 
@@ -967,7 +969,9 @@ const PLACES = {
       let busy = Math.abs(look.tYaw - look.yaw) > 0.05 || Math.abs(look.tPitch - look.pitch) > 0.05;
 
       for (const s of scenes) {
-        if (sy + vh < s.top - vh * 0.5 || sy > s.top + s.height + vh * 0.5) continue;
+        const near = !(sy + vh < s.top - vh * 0.5 || sy > s.top + s.height + vh * 0.5);
+        if (near !== s.shown) { s.shown = near; s.world.style.display = near ? "" : "none"; }
+        if (!near) continue;
         const prog = clampN((sy + headerH - s.top) / Math.max(1, s.height - H), 0, 1);
         const cam = camera(s, prog * s.total);
         const zpx = cam.z * D;
@@ -1091,7 +1095,14 @@ const PLACES = {
   setInterval(applyHours, 60000);
   watchLights();
   watchSpaces();
-  initWalk();
+  try {
+    initWalk();
+  } catch (err) {
+    // 3D の展示室が使えない環境では、通常の縦に並んだ展示に戻す
+    console.error(err);
+    root.classList.remove("walk");
+    $$(".sv").forEach((el) => el.remove());
+  }
   updateMapHere("entrance");
 
   const initial = location.hash.slice(1);
