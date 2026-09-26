@@ -930,3 +930,138 @@ body { overflow-x: clip; }
 @media (max-width: 860px) {
   .entrance .now-on-view { border-left: 0; padding-left: 0; text-align: left; }
 }
+
+/* ---------------------------------------------------------------------
+   3D 展示室の仕上げ — 漆喰の壁、磨いたコンクリートの床、光のスリット、額装
+   --------------------------------------------------------------------- */
+:root {
+  --plaster: #efede8;
+  --concrete-1: #c9c4bb;
+  --concrete-2: #b5afa5;
+  --ceiling: #f4f2ee;
+  --slot: #fffaf0;
+  --wash: rgba(255, 249, 236, .5);
+}
+:root[data-hours="closed"] {
+  --plaster: #2b2a28;
+  --concrete-1: #2c2a27;
+  --concrete-2: #23211f;
+  --ceiling: #1f1e1c;
+  --slot: #ffe9c4;
+  --wash: rgba(255, 232, 196, .08);
+}
+
+/* 壁：天井際と床際に陰、上からの光のにじみ、細い目地（シャドウギャップ）の巾木 */
+.sv-wall {
+  background-color: var(--plaster);
+  background-image:
+    linear-gradient(to bottom, rgba(var(--shadow-rgb), .16) 0, transparent 7%, transparent 82%, rgba(var(--shadow-rgb), .1) 96%),
+    linear-gradient(to bottom, var(--wash) 4%, transparent 42%),
+    var(--noise);
+  box-shadow: none;
+}
+.gallery--hall .sv-wall { background-color: var(--stone); }
+.gallery--special .sv-wall { background-color: var(--special); --wash: rgba(160, 180, 230, .07); }
+.sv-left::before, .sv-right::before, .sv-end::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 13px; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,.34) 0 3px, color-mix(in srgb, var(--plaster) 82%, #000) 3px);
+}
+.gallery--special .sv-left::before, .gallery--special .sv-right::before, .gallery--special .sv-end::before { background: linear-gradient(to bottom, rgba(0,0,0,.5) 0 3px, #151923 3px); }
+.sv-left::after { background: linear-gradient(to right, transparent 35%, rgba(var(--shadow-rgb), .16)); }
+.sv-right::after { background: linear-gradient(to left, transparent 35%, rgba(var(--shadow-rgb), .16)); }
+.sv-end::after { background: linear-gradient(to bottom, transparent 60%, rgba(var(--shadow-rgb), .06)); }
+
+/* 床：磨いたコンクリート。壁ぎわの陰、天井の光の映り込み、目地 */
+.sv-floor {
+  background-color: var(--concrete-1);
+  background-image:
+    linear-gradient(90deg, rgba(0,0,0,.28), transparent 2.5%, transparent 97.5%, rgba(0,0,0,.28)),
+    linear-gradient(90deg, transparent 24%, rgba(255,255,255,.16) 30%, transparent 36%, transparent 64%, rgba(255,255,255,.16) 70%, transparent 76%),
+    linear-gradient(90deg, rgba(255,255,255,.1), transparent 12%, transparent 88%, rgba(255,255,255,.1)),
+    linear-gradient(to bottom, transparent 25%, rgba(var(--shadow-rgb), .22)),
+    repeating-linear-gradient(to bottom, transparent 0 718px, rgba(0,0,0,.07) 718px 720px),
+    var(--cloud),
+    linear-gradient(90deg, var(--concrete-1), var(--concrete-2) 50%, var(--concrete-1));
+}
+
+/* 天井：白い天井に、細い光のスリットが二本 */
+.sv-ceil {
+  background:
+    linear-gradient(90deg, rgba(var(--shadow-rgb), .14), transparent 6%, transparent 94%, rgba(var(--shadow-rgb), .14)),
+    radial-gradient(ellipse 8% 100% at 30% 50%, rgba(255, 244, 222, .35), transparent),
+    radial-gradient(ellipse 8% 100% at 70% 50%, rgba(255, 244, 222, .35), transparent),
+    var(--ceiling);
+}
+.sv-ceil span { width: 6px; background: var(--slot); opacity: 1; box-shadow: 0 0 14px 4px rgba(255, 244, 222, .55); }
+.sv-view { background: var(--ceiling); }
+
+/* 作品を照らす光：天井のスポットから、額の上に落ちる扇形の光 */
+.sv-work::before {
+  left: -55%; right: -55%; top: -70%; bottom: -30%;
+  background: radial-gradient(ellipse 48% 62% at 50% 8%, rgba(255, 248, 232, .62), rgba(255, 248, 232, .18) 55%, transparent 75%);
+  opacity: .8;
+}
+[data-hours="closed"] .sv-work::before, .gallery--special .sv-work::before {
+  background: radial-gradient(ellipse 46% 60% at 50% 8%, rgba(255, 236, 200, .28), rgba(255, 236, 200, .08) 55%, transparent 75%);
+  opacity: 1;
+}
+
+/* 額装：細い額、マットの面取り、下に落ちる柔らかい影、ガラスのわずかな映り込み */
+.sv-work .frame {
+  padding: calc(var(--h) * .014);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.12),
+    0 2px 3px rgba(0,0,0,.14),
+    0 calc(var(--h) * .05) calc(var(--h) * .08) calc(var(--h) * -.03) rgba(var(--shadow-rgb), .42);
+}
+.sv-work .frame--white { background: linear-gradient(160deg, #fbfaf6, #e9e6df); }
+.sv-work .frame--black { background: linear-gradient(160deg, #2e2e2c, #111110); }
+.sv-work .frame--oak { background: linear-gradient(160deg, #d2b893, #b39468); }
+.sv-work .frame--none { background: none; box-shadow: 0 1px 2px rgba(0,0,0,.2), 0 calc(var(--h) * .04) calc(var(--h) * .06) calc(var(--h) * -.02) rgba(var(--shadow-rgb), .4); }
+.sv-work .mat {
+  position: relative; padding: calc(var(--h) * .07);
+  background: #fbfaf7;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,.14), inset -1px -1px 1px rgba(255,255,255,.8);
+}
+.sv-work .mat img { box-shadow: 0 0 0 2px #fffefb, 0 0 0 3px rgba(0,0,0,.1); background: #ddd; }
+.sv-work .frame--none .mat img { box-shadow: none; }
+.sv-work .mat::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(118deg, transparent 38%, rgba(255,255,255,.12) 46%, transparent 56%);
+}
+.sv-work .frame--none .mat::after { display: none; }
+
+/* 壁の解説ラベル：壁に直接貼ったカッティング文字 */
+.sv-work .label { color: var(--ink-2); opacity: .7; }
+.sv-work.is-focus .label { opacity: 1; }
+
+/* 突き当たりの出口：奥行きのある開口と、壁に貼った行き先 */
+.sv-door {
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255, 244, 222, .16), transparent 70%),
+    linear-gradient(to bottom, #262521, #121211);
+  box-shadow: inset 14px 0 18px -10px rgba(0,0,0,.7), inset -14px 0 18px -10px rgba(0,0,0,.7), inset 0 14px 18px -10px rgba(0,0,0,.7);
+  color: transparent; align-content: end; padding-bottom: 8%;
+}
+.sv-door-kicker, .sv-door-ja { color: var(--on-dark-2); }
+.sv-door-name {
+  position: absolute; left: 50%; bottom: calc(100% + 1.4em); transform: translateX(-50%);
+  white-space: nowrap; color: var(--ink); font-size: 1em; letter-spacing: .22em;
+}
+.sv-door-name::after { content: " →"; font-family: var(--mono); }
+.gallery--special .sv-door-name { color: var(--on-dark); }
+
+/* 視野の周辺をわずかに落とす（固定。毎フレームは変えない） */
+.sv-shade { opacity: .22; background: radial-gradient(ellipse 80% 75% at 50% 50%, transparent 60%, rgba(0,0,0,.4)); }
+
+.gallery--special { --concrete-1: #2b2d33; --concrete-2: #212329; --ceiling: #1a1d25; --slot: #dfe6ff; }
+.gallery--special .sv-ceil span { box-shadow: 0 0 14px 4px rgba(200, 215, 255, .35); }
+/* 中央ホール：石の壁。まだらではなく、目地の入った石板に */
+.gallery--hall .sv-wall {
+  background-image:
+    linear-gradient(to bottom, rgba(var(--shadow-rgb), .16) 0, transparent 7%, transparent 82%, rgba(var(--shadow-rgb), .1) 96%),
+    linear-gradient(to bottom, var(--wash) 4%, transparent 42%),
+    repeating-linear-gradient(90deg, transparent 0 959px, rgba(var(--shadow-rgb), .05) 959px 960px),
+    repeating-linear-gradient(to bottom, transparent 0 479px, rgba(var(--shadow-rgb), .04) 479px 480px),
+    var(--noise);
+}

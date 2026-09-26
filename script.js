@@ -818,8 +818,8 @@ const PLACES = {
       }
       push({ z, yaw, w: 0.55, stop: i });                        // 立ち止まって見る
     });
-    push({ z: len - 0.55, yaw: 0, w: 0.3 + Math.abs(len - 0.55 - cur.z) * 0.4 });
-    push({ z: len - 0.55, yaw: 0, w: 0.3, end: true });
+    push({ z: len - 1.05, yaw: 0, w: 0.3 + Math.abs(len - 1.05 - cur.z) * 0.4 });
+    push({ z: len - 1.05, yaw: 0, w: 0.3, end: true });
     return keys;
   }
 
@@ -973,7 +973,12 @@ const PLACES = {
         if (near !== s.shown) { s.shown = near; s.world.style.display = near ? "" : "none"; }
         if (!near) continue;
         const prog = clampN((sy + headerH - s.top) / Math.max(1, s.height - H), 0, 1);
-        const cam = camera(s, prog * s.total);
+        // スクロールにそのまま追従させず、少しだけ遅れて滑らかについていく（カクつきを抑える）
+        const target = prog * s.total;
+        if (s.u === undefined || Math.abs(target - s.u) > 1.5) s.u = target;
+        else s.u += (target - s.u) * 0.2;
+        if (Math.abs(target - s.u) > 0.0008) busy = true;
+        const cam = camera(s, s.u);
         const zpx = cam.z * D;
         // 歩行のリズム（上下の揺れ）と足音
         const dz = s.lastZ === null ? 0 : Math.abs(zpx - s.lastZ);
@@ -988,7 +993,6 @@ const PLACES = {
 
         const yaw = cam.yaw + look.yaw;
         s.world.style.transform = `translateZ(${P}px) rotateX(${look.pitch.toFixed(2)}deg) rotateY(${(-yaw).toFixed(2)}deg) translate3d(0, ${(-bob).toFixed(2)}px, ${zpx.toFixed(1)}px)`;
-        s.shade.style.opacity = (0.15 + s.activity * 0.35).toFixed(3);
         s.needle.style.transform = `rotate(${yaw.toFixed(1)}deg)`;
 
         if (cam.stop !== s.focus || s._end !== cam.end) {
