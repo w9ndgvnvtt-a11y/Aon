@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>アクセス｜Aon 写真展 Tayutau</title>
+  <meta name="description" content="吉祥寺駅北口から PENNY LANE GALLERY（コピス吉祥寺 A館 1階）までの道案内">
+  <style>
+    :root {
+      --paper: #ffffff; --ink: #232323; --sub: #8a8a8a; --line: #e6e6e6;
+      --accent: #4b9fd5; --accent-soft: #c6e3f4; --accent-faint: #e5f2fa; --plaza: #f0f0f0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --paper: #15181b; --ink: #e9e9e9; --sub: #8d949a; --line: #2b3035;
+        --accent: #6cb6e6; --accent-soft: #24445a; --accent-faint: #1c2f3c; --plaza: #22272b;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--paper); color: var(--ink); }
+    body {
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif;
+      line-height: 1.7; -webkit-text-size-adjust: 100%;
+    }
+    .wrap { max-width: 560px; margin: 0 auto; padding: 28px 16px 48px; }
+    .latin { font-family: "Futura", "Century Gothic", "Avenir Next", "Helvetica Neue", Arial, sans-serif; }
+    header .artist { color: var(--accent-soft); letter-spacing: .12em; font-size: 15px; margin: 0; }
+    header h1 { margin: 2px 0 14px; font-size: 34px; letter-spacing: .06em; line-height: 1.2; }
+    header p { margin: 0; font-size: 14px; }
+    header .date { font-size: 18px; }
+    .venue { margin-top: 12px; font-size: 13px; color: var(--sub); }
+    .venue strong { color: var(--ink); font-weight: 500; letter-spacing: .04em; }
+
+    .summary { margin: 26px 0 8px; font-size: 15px; }
+    .summary b { font-weight: 600; }
+
+    figure { margin: 0 -16px; }
+    #map { display: block; width: 100%; height: auto; touch-action: manipulation; }
+    #map .roads path { fill: none; stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; }
+    #map .roads .major { stroke-width: 1.7; }
+    #map .roads .minor { stroke-width: 0.9; }
+    #map .plaza { fill: var(--plaza); }
+    #map .coppice-a { fill: var(--accent-soft); }
+    #map .coppice-b { fill: var(--accent-faint); }
+    #map .rail { stroke: var(--ink); stroke-width: .35; stroke-dasharray: 1.4 .9; }
+    #map .station { fill: var(--paper); stroke: var(--ink); stroke-width: .3; }
+    #map text { font-family: inherit; text-anchor: middle; dominant-baseline: middle;
+      paint-order: stroke; stroke: var(--paper); stroke-width: .6px; stroke-linejoin: round; }
+    #map .lbl { font-size: 2.6px; fill: var(--ink); }
+    #map .lbl.sub { fill: var(--sub); font-size: 2.3px; }
+    #map .lbl.cop { fill: var(--accent); font-size: 2.3px; }
+    #map .lbl.st { font-size: 2.4px; stroke: none; }
+    #map .lbl.ent { fill: var(--accent); font-size: 2.3px; }
+    #map .seg { fill: none; stroke: var(--accent); stroke-width: .75; stroke-dasharray: 1.3 .9;
+      stroke-linecap: round; stroke-linejoin: round; transition: opacity .25s, stroke-width .25s; }
+    #map .seg.corridor { stroke-width: .5; stroke-dasharray: .5 .6; }
+    #map .arrow { fill: var(--accent); }
+    #map.focus .seg { opacity: .22; }
+    #map.focus .seg.on { opacity: 1; stroke-width: 1.15; }
+    #map .exit rect { fill: var(--accent); }
+    #map .exit text { fill: #fff; font-size: 2.1px; stroke: none; }
+    #map .gallery .halo { fill: var(--accent); opacity: .2; }
+    #map .gallery .dot { fill: var(--accent); stroke: var(--paper); stroke-width: .45; }
+    #map .gallery line { stroke: var(--accent); stroke-width: .22; }
+    #map .gname { fill: var(--accent); font-size: 3.1px; letter-spacing: .15px;
+      font-family: "Futura", "Century Gothic", "Avenir Next", Arial, sans-serif; }
+    #map .gsub { fill: var(--ink); font-size: 2.2px; }
+    #map .credit { font-size: 1.3px; fill: var(--sub); text-anchor: end; stroke: none; }
+    #map #me[hidden] { display: none; }
+    #map .me-halo { fill: #e5484d; opacity: .18; }
+    #map .me-dot { fill: #e5484d; stroke: var(--paper); stroke-width: .5; }
+
+    .tools { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 4px; }
+    button, .btn {
+      appearance: none; border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+      font: inherit; font-size: 14px; padding: 10px 14px; border-radius: 999px; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 6px; min-height: 44px;
+    }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button:focus-visible, .btn:focus-visible, .step:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    #status { font-size: 13px; color: var(--sub); min-height: 1.7em; margin: 6px 0 0; }
+
+    ol.steps { list-style: none; margin: 22px 0 0; padding: 0; border-top: 1px solid var(--line); }
+    .step { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 14px 4px;
+      border-bottom: 1px solid var(--line); cursor: pointer; }
+    .step .no { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+      font-size: 13px; color: var(--accent); border: 1px solid var(--accent-soft); margin-top: 2px; }
+    .step.on .no, .step.here .no { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .step h2 { font-size: 15px; font-weight: 600; margin: 0; }
+    .step p { margin: 2px 0 0; font-size: 13px; color: var(--sub); }
+    .step .m { font-size: 12px; color: var(--sub); }
+    .note { font-size: 12px; color: var(--sub); margin-top: 22px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="artist latin">Aon</p>
+    <h1 class="latin">Tayutau</h1>
+    <p class="date"><span class="latin">2027.3.5</span> 金 – <span class="latin">3.11</span> 木</p>
+    <p class="latin">11:00 – 18:00</p>
+    <p class="venue"><strong class="latin">PENNY LANE GALLERY</strong><br>
+      〒180-0004 東京都武蔵野市吉祥寺本町1-8-16<br>コピス吉祥寺 A館 1階</p>
+  </header>
+
+  <p class="summary">吉祥寺駅 <b>北口</b>から <b>約257m・徒歩4分</b>ほどです。</p>
+
+  <figure><svg id="map" viewBox="0 0 100 96" role="img" aria-label="吉祥寺駅北口からPENNY LANE GALLERYまでの地図">
+<defs><linearGradient id="fl" x1="0" x2="1"><stop offset="0" stop-color="var(--paper)"/><stop offset="1" stop-color="var(--paper)" stop-opacity="0"/></linearGradient><linearGradient id="fr" x1="1" x2="0"><stop offset="0" stop-color="var(--paper)"/><stop offset="1" stop-color="var(--paper)" stop-opacity="0"/></linearGradient><linearGradient id="ft" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--paper)"/><stop offset="1" stop-color="var(--paper)" stop-opacity="0"/></linearGradient><linearGradient id="fb" x1="0" x2="0" y1="1" y2="0"><stop offset="0" stop-color="var(--paper)"/><stop offset="1" stop-color="var(--paper)" stop-opacity="0"/></linearGradient><marker id="ar" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="3" markerHeight="3" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrow"/></marker></defs>
+<g class="roads">
+<path d="M0.99,74.94 L4.07,76.38 L5.50,77.02 L11.55,79.77" class="major"/>
+<path d="M46.18,84.54 L47.42,85.08 L48.20,85.43 L52.63,87.31 L54.34,88.02" class="minor"/>
+<path d="M18.08,40.53 L17.03,39.94 L6.58,34.08 L1.53,31.25 L-4.36,27.95 L-4.75,27.73 L-6.57,26.71 L-13.57,22.78 L-21.33,18.43 L-30.31,13.40 L-37.19,9.54 L-44.81,5.55 L-53.28,0.52 L-63.10,-4.99 L-72.75,-10.39 L-81.05,-15.05 L-81.84,-15.49 L-90.16,-20.15 L-98.03,-24.57 L-104.27,-28.06 L-110.86,-31.76" class="minor"/>
+<path d="M-32.91,39.93 L-21.33,18.43 L-10.49,-1.44 L-0.06,-20.78" class="minor"/>
+<path d="M29.15,-39.36 L28.71,-38.58 L4.25,6.66" class="minor"/>
+<path d="M-10.49,69.60 L-9.91,68.54 L-3.61,57.10" class="minor"/>
+<path d="M-5.40,56.05 L6.58,34.08" class="minor"/>
+<path d="M37.50,-22.66 L45.42,-17.89 L46.80,-17.05" class="minor"/>
+<path d="M77.36,112.95 L76.73,114.15 L73.60,120.01" class="minor"/>
+<path d="M102.55,-52.35 L102.20,-51.42 L80.05,-7.05 L79.37,-5.64" class="minor"/>
+<path d="M112.90,16.62 L113.45,15.61 L124.29,-6.05 L126.69,-10.85 L136.76,-31.44 L142.80,-43.38 L143.12,-44.01" class="minor"/>
+<path d="M27.70,137.49 L28.37,135.87 L33.42,125.84 L39.13,114.16 L47.05,98.18" class="minor"/>
+<path d="M83.52,106.73 L83.82,106.09 L90.59,91.80 L96.46,93.01 L100.85,94.18 L101.89,94.45 L112.73,97.03 L125.12,100.20 L133.47,102.47 L135.70,102.91 L142.43,104.76" class="minor"/>
+<path d="M74.25,69.39 L79.01,69.58 L82.72,69.78 L88.53,70.00 L94.20,70.18 L105.16,70.49 L107.28,70.53" class="minor"/>
+<path d="M127.33,67.22 L126.85,66.98 L112.45,59.82 L101.89,54.56 L97.08,52.17" class="minor"/>
+<path d="M101.89,54.56 L94.64,69.30 L94.20,70.18" class="minor"/>
+<path d="M68.12,67.99 L65.01,67.84 L61.52,67.64" class="minor"/>
+<path d="M19.29,41.12 L30.91,47.24 L37.58,50.77" class="minor"/>
+<path d="M104.36,36.99 L96.76,33.42" class="minor"/>
+<path d="M14.06,80.88 L14.61,79.71 L16.26,79.41 L19.22,79.65 L24.33,80.02 L40.73,83.17 L44.70,83.95 L46.18,84.54" class="minor"/>
+<path d="M49.81,64.65 L52.59,58.78" class="minor"/>
+<path d="M3.99,119.87 L13.21,101.42" class="minor"/>
+<path d="M33.74,97.25 L26.48,93.43" class="minor"/>
+<path d="M52.55,67.01 L52.72,64.40 L52.95,63.35 L53.35,62.70 L53.61,62.44 L53.92,62.17 L54.31,61.97 L54.72,61.85 L64.04,62.13 L65.22,62.16 L68.49,62.23" class="minor"/>
+<path d="M23.41,29.84 L24.57,30.44 L31.35,33.96 L36.10,36.43 L36.36,36.56 L43.06,40.14 L50.48,43.89 L52.03,44.71 L58.26,47.94" class="minor"/>
+<path d="M22.82,64.39 L22.85,62.48 L26.11,56.58 L30.91,47.24" class="minor"/>
+<path d="M13.26,50.30 L14.40,50.84 L26.11,56.58 L33.07,59.98" class="minor"/>
+<path d="M76.06,41.83 L75.39,41.48 L64.52,35.85" class="minor"/>
+<path d="M81.08,35.43 L79.43,34.60" class="major"/>
+<path d="M70.42,52.94 L69.53,52.40 L62.77,48.79" class="minor"/>
+<path d="M37.58,50.77 L39.13,51.65 L42.26,53.25 L44.79,54.67 L46.49,55.53 L47.29,55.94 L51.84,58.35" class="minor"/>
+<path d="M107.28,70.53 L104.32,76.69 L100.47,84.68 L96.46,93.01 L92.22,101.83 L88.98,108.56 L88.72,109.10" class="minor"/>
+<path d="M69.58,108.77 L70.20,107.60 L72.69,102.42 L73.00,101.74 L73.21,101.21 L83.97,78.77" class="minor"/>
+<path d="M69.83,78.69 L72.44,78.76 L83.97,78.77" class="minor"/>
+<path d="M89.31,109.42 L89.23,110.18 L88.59,117.55 L88.23,118.78" class="minor"/>
+<path d="M59.09,98.13 L58.37,96.66 L54.90,89.18 L54.34,88.02" class="minor"/>
+<path d="M-10.44,53.25 L1.53,31.25 L11.60,12.39 L12.30,11.08" class="minor"/>
+<path d="M104.52,117.28 L104.70,116.70 L107.13,108.86 L112.73,97.03 L125.58,71.05 L127.33,67.22 L132.06,57.26 L141.77,37.08 L142.32,35.97" class="minor"/>
+<path d="M18.41,-45.38 L17.99,-44.60 L4.12,-18.53 L-0.06,-20.78 L-8.41,-26.15 L-2.13,-37.93" class="minor"/>
+<path d="M-136.87,-70.87 L-128.01,-66.00 L-121.47,-62.41 L-115.72,-59.25 L-100.31,-50.78 L-92.61,-46.55 L-88.06,-44.26 L-79.45,-40.01 L-70.77,-35.23 L-69.98,-34.77 L-61.98,-30.25 L-52.16,-24.62 L-42.59,-19.23 L-34.22,-14.48 L-34.17,-14.45 L-24.78,-9.29 L-19.41,-6.34 L-10.49,-1.44 L-3.38,2.47 L4.25,6.66 L12.30,11.08 L17.15,13.74 L27.37,19.36 L28.38,19.91" class="minor"/>
+<path d="M96.76,33.42 L92.55,31.47 L85.64,28.25 L84.74,27.87" class="minor"/>
+<path d="M88.53,70.00 L88.95,69.13 L91.36,64.10 L97.08,52.17" class="minor"/>
+<path d="M63.25,38.29 L56.88,34.89 L54.56,33.48 L36.39,24.25 L29.40,20.51 L28.38,19.91" class="minor"/>
+<path d="M61.58,25.66 L48.88,19.17 L34.78,12.25 L32.59,11.20" class="major"/>
+<path d="M30.46,65.73 L30.90,64.65 L33.07,59.98 L34.79,56.58 L37.58,50.77 L38.15,50.31 L43.06,40.14" class="minor"/>
+<path d="M23.24,2.84 L17.15,13.74" class="minor"/>
+<path d="M29.89,-9.05 L23.24,2.84" class="minor"/>
+<path d="M37.50,-22.66 L29.89,-9.05" class="minor"/>
+<path d="M4.25,6.66 L-6.57,26.71 L-18.32,48.49" class="minor"/>
+<path d="M24.88,-12.03 L12.30,11.08" class="minor"/>
+<path d="M24.88,-12.03 L36.70,-33.65 L37.22,-34.58" class="minor"/>
+<path d="M61.97,91.47 L63.67,92.69" class="minor"/>
+<path d="M52.21,-24.94 L53.32,-24.16 L63.32,-17.10 L66.26,-14.96 L69.15,-12.85 L73.41,-9.85 L79.37,-5.64 L84.45,-2.01 L88.89,1.06 L92.16,3.35 L93.88,4.50" class="major"/>
+<path d="M68.10,28.93 L61.58,25.66" class="major"/>
+<path d="M85.46,-3.13 L98.20,-29.01" class="minor"/>
+<path d="M32.59,11.20 L33.72,8.90 L33.89,8.56 L39.75,-3.22 L46.80,-17.05 L49.93,-23.59 L50.98,-25.82" class="major"/>
+<path d="M102.63,-26.89 L89.54,-0.23 L88.89,1.06" class="minor"/>
+<path d="M95.29,5.36 L94.08,7.84 L84.74,27.87 L81.95,33.58 L81.08,35.43" class="major"/>
+<path d="M7.25,62.94 L8.07,60.54 L13.26,50.30" class="major"/>
+<path d="M-10.49,69.60 L-26.37,62.83 L-33.85,59.47 L-40.56,56.47 L-41.64,55.98 L-46.32,53.88 L-51.01,51.77 L-64.43,45.75 L-67.53,44.36 L-74.88,41.11 L-84.48,36.88 L-85.38,36.48 L-96.19,31.68 L-104.99,27.64 L-113.16,23.94 L-114.32,23.46 L-119.35,21.36 L-123.21,19.70 L-127.72,17.66 L-131.16,16.00 L-135.93,13.87 L-141.64,11.35 L-151.74,6.76 L-160.92,2.64 L-165.46,0.69 L-169.32,-1.15 L-172.88,-2.74" class="major"/>
+<path d="M0.99,74.94 L2.57,71.94 L2.94,71.22 L6.42,65.04 L7.25,62.94" class="major"/>
+<path d="M28.38,19.91 L31.28,13.73 L32.59,11.20" class="major"/>
+<path d="M3.35,96.40 L6.79,98.15 L13.21,101.42" class="minor"/>
+<path d="M-8.03,90.61 L-7.32,90.98 L3.35,96.40" class="minor"/>
+<path d="M20.55,105.11 L13.21,101.42" class="minor"/>
+<path d="M33.74,97.25 L36.25,92.45" class="minor"/>
+<path d="M20.55,105.11 L26.48,93.43 L28.76,88.93 L29.28,87.66" class="minor"/>
+<path d="M-4.72,112.10 L3.35,96.40" class="minor"/>
+<path d="M9.38,84.15 L10.98,80.89 L11.55,79.77" class="minor"/>
+<path d="M19.24,89.32 L21.10,85.57 L21.70,84.37" class="minor"/>
+<path d="M13.21,101.42 L19.24,89.32" class="minor"/>
+<path d="M52.59,58.78 L58.26,47.94 L59.17,46.25 L63.25,38.29 L64.52,35.85 L67.49,30.11 L68.10,28.93 L68.74,27.70 L71.92,21.57 L75.55,14.57 L81.64,2.80 L82.63,0.88 L83.51,-0.81" class="minor"/>
+<path d="M7.25,-16.37 L-3.38,2.47" class="minor"/>
+<path d="M118.18,20.12 L117.73,20.96 L113.72,29.47 L110.87,35.59 L101.89,54.56" class="minor"/>
+<path d="M128.44,26.71 L128.01,27.59 L124.43,35.02 L121.57,40.93 L112.45,59.82 L107.28,70.53" class="minor"/>
+<path d="M-15.69,81.74 L-10.90,82.19 L-4.33,82.81 L-3.12,82.96" class="minor"/>
+<path d="M13.26,50.30 L15.58,45.59 L17.48,41.68 L18.08,40.53 L18.61,39.49 L23.41,29.84 L23.71,29.21 L26.87,22.93 L28.38,19.91" class="major"/>
+<path d="M3.35,96.40 L9.38,84.15" class="minor"/>
+<path d="M39.13,114.16 L27.97,108.75 L20.55,105.11" class="minor"/>
+<path d="M15.60,114.89 L20.55,105.11" class="minor"/>
+<path d="M59.77,101.04 L57.99,102.46" class="major"/>
+<path d="M63.67,92.69 L65.10,93.95 L69.90,98.70 L73.00,101.74 L80.08,105.10 L83.52,106.73 L88.72,109.10 L89.31,109.42 L94.02,111.84 L104.52,117.28 L114.52,122.20 L122.06,126.12" class="minor"/>
+<path d="M143.65,148.61 L127.39,139.97 L126.20,139.31 L124.46,138.40 L114.65,133.16 L113.19,132.36 L110.90,131.14 L110.12,130.71 L101.81,126.35 L100.65,125.73 L99.36,125.03 L88.23,118.78 L86.59,117.92 L77.36,112.95 L69.58,108.77 L62.09,104.67 L61.58,104.38 L57.99,102.46" class="major"/>
+<path d="M-60.08,115.24 L-48.76,108.87 L-43.91,106.33 L-35.50,101.92 L-34.38,101.44 L-29.32,99.90 L-22.41,97.72 L-21.51,97.43 L-15.09,95.32 L-13.13,94.52 L-11.50,93.62 L-8.82,91.46 L-8.03,90.61 L-5.64,87.74 L-4.90,86.56 L-3.12,82.96" class="major"/>
+<path d="M68.12,67.99 L68.49,62.23" class="major"/>
+<path d="M57.99,102.46 L58.19,100.13 L59.09,98.13 L61.97,91.47" class="major"/>
+<path d="M68.49,62.23 L70.67,62.35" class="minor"/>
+<path d="M79.43,34.60 L77.78,33.80 L68.10,28.93" class="major"/>
+<path d="M70.35,68.13 L70.28,70.22 L69.83,78.69 L69.40,80.22 L64.06,91.83 L63.67,92.69" class="major"/>
+<path d="M68.49,62.23 L68.74,60.26 L68.96,58.53 L69.72,55.02 L70.42,52.94 L75.33,43.40 L76.06,41.83" class="major"/>
+<path d="M79.43,34.60 L80.28,32.80 L83.11,27.19 L92.60,7.11 L93.88,4.50" class="major"/>
+<path d="M81.08,35.43 L80.14,37.39 L77.76,42.55 L76.94,44.23 L72.29,53.44 L71.45,55.69 L70.92,59.51 L70.82,60.37 L70.67,62.35" class="major"/>
+<path d="M70.35,68.13 L68.12,67.99" class="minor"/>
+<path d="M52.55,67.01 L50.24,66.80 L37.76,66.04 L30.46,65.73 L22.80,65.52 L21.05,65.44 L13.27,65.06 L11.07,64.59 L9.52,64.05 L9.01,63.87 L7.25,62.94" class="major"/>
+<path d="M49.61,98.13 L48.61,97.61 L47.73,97.16 L46.49,96.52 L42.82,94.50 L38.20,92.02" class="major"/>
+<path d="M61.97,91.47 L62.43,90.40 L67.30,79.77 L67.57,78.59 L67.82,75.32" class="major"/>
+<path d="M71.92,21.57 L82.31,26.80 L83.11,27.19" class="minor"/>
+<path d="M93.88,4.50 L95.29,5.36" class="major"/>
+<path d="M83.97,78.77 L84.32,78.09 L104.32,76.69" class="minor"/>
+<path d="M67.82,75.32 L67.97,71.49 L68.02,70.05 L68.12,67.99" class="major"/>
+<path d="M128.44,26.71 L127.48,26.11 L125.77,25.01 L118.18,20.12 L116.94,19.29 L113.84,17.23 L112.90,16.62 L112.11,16.10 L109.72,14.50 L106.63,12.44 L102.22,9.48 L98.23,7.05 L95.29,5.36" class="major"/>
+<path d="M70.67,62.35 L70.35,68.13" class="major"/>
+<path d="M62.27,95.85 L60.58,99.65 L60.38,100.08 L59.77,101.04" class="major"/>
+<path d="M63.67,92.69 L62.27,95.85" class="major"/>
+<path d="M113.72,29.47 L124.43,35.02" class="minor"/>
+<path d="M76.06,41.83 L78.54,36.59 L79.43,34.60" class="major"/>
+<path d="M48.46,96.01 L50.41,92.23 L52.32,88.09" class="minor"/>
+<path d="M89.55,48.42 L78.48,42.91 L77.76,42.55" class="minor"/>
+<path d="M125.58,71.05 L124.97,71.05 L116.16,70.91 L107.28,70.53" class="minor"/>
+<path d="M97.08,52.17 L89.55,48.42" class="minor"/>
+<path d="M97.08,52.17 L104.36,36.99 L106.18,33.22 L113.32,18.33 L113.84,17.23" class="minor"/>
+<path d="M23.41,85.14 L21.70,84.37 L18.69,83.01" class="major"/>
+<path d="M38.20,92.02 L36.83,91.30 L34.77,90.26" class="major"/>
+<path d="M34.77,90.26 L30.97,88.45" class="major"/>
+<path d="M30.97,88.45 L29.28,87.66 L27.04,86.71" class="major"/>
+<path d="M27.04,86.71 L25.50,86.05 L23.41,85.14" class="major"/>
+<path d="M57.99,102.46 L53.51,100.14 L49.61,98.13" class="major"/>
+<path d="M18.69,83.01 L14.06,80.88" class="major"/>
+<path d="M-3.12,82.96 L-1.29,79.33 L-0.45,77.65" class="major"/>
+<path d="M7.25,62.94 L5.62,62.12 L-3.61,57.10 L-5.40,56.05 L-10.44,53.25 L-13.51,51.40 L-18.32,48.49 L-23.29,45.71 L-25.70,44.15 L-32.91,39.93 L-37.39,37.45 L-41.96,34.84 L-44.73,33.35 L-49.67,30.64 L-56.51,27.09 L-57.82,26.34 L-65.31,22.21 L-68.78,20.30 L-69.54,19.89 L-70.36,19.42 L-74.65,17.12 L-80.65,13.82 L-84.67,11.61 L-93.64,6.49 L-101.48,2.07 L-101.99,1.76 L-107.08,-1.05 L-109.71,-2.60 L-114.84,-5.58 L-116.13,-6.32 L-122.63,-10.07" class="minor"/>
+<path d="M54.34,88.02 L60.76,90.68 L61.97,91.47" class="minor"/>
+<path d="M11.55,79.77 L14.06,80.88" class="major"/>
+<path d="M26.48,93.43 L19.24,89.32 L12.62,85.85 L9.38,84.15" class="minor"/>
+<path d="M23.30,118.76 L27.97,108.75 L33.74,97.25" class="minor"/>
+<path d="M18.08,40.53 L19.29,41.12" class="minor"/>
+<path d="M51.84,58.35 L52.59,58.78" class="minor"/>
+<path d="M70.35,68.13 L72.98,69.21 L74.25,69.39" class="minor"/>
+<path d="M0.99,74.94 L-1.22,73.93 L-2.61,73.27 L-10.49,69.60" class="major"/>
+<path d="M-0.45,77.65 L0.99,74.94" class="major"/>
+<path d="M57.13,67.39 L52.55,67.01" class="minor"/>
+<path d="M106.63,12.44 L106.13,13.64 L104.19,17.72 L98.59,29.56 L96.76,33.42" class="minor"/>
+<path d="M61.52,67.64 L57.13,67.39" class="minor"/>
+<path d="M47.05,98.18 L47.73,97.16" class="minor"/>
+<path d="M37.40,90.11 L40.73,83.17" class="minor"/>
+<path d="M83.51,-0.81 L83.70,-1.17" class="minor"/>
+</g>
+<path d="M49.31,66.19 L51.82,58.20 L66.37,56.34 L67.57,66.98 Z" class="plaza"/>
+<path d="M45.40,28.10 L53.23,32.06 L54.94,32.92 L55.47,33.19 L55.39,33.36 L56.50,33.92 L56.66,33.62 L56.85,33.72 L57.20,33.03 L57.40,33.13 L57.54,32.85 L57.69,32.57 L57.59,32.51 L57.48,32.46 L58.66,30.12 L59.83,27.79 L60.26,26.94 L48.87,21.18 L48.14,20.81 L47.40,20.44 L47.15,20.94 L46.90,21.45 L46.70,21.85 L43.93,27.36 L44.46,27.62 L45.40,28.10 Z" class="coppice-b"/><path d="M38.71,26.05 L45.60,29.45 L46.63,29.96 L53.28,33.24 L49.08,41.76 L43.33,38.92 L42.18,38.35 L42.65,37.39 L36.88,34.39 L36.35,35.48 L34.51,34.58 L38.71,26.05 Z" class="coppice-a"/>
+<line x1="-2" y1="76.01" x2="102" y2="76.01" class="rail"/>
+<rect width="8" height="96" fill="url(#fl)"/><rect x="92" width="8" height="96" fill="url(#fr)"/><rect width="100" height="8" fill="url(#ft)"/><rect y="88" width="100" height="8" fill="url(#fb)"/>
+<rect x="44.69" y="73.41" width="30" height="5.2" class="station"/>
+<text x="59.69" y="76.21" class="lbl st">JR・京王線 吉祥寺駅</text>
+<text x="45.92" y="36.68" class="lbl cop" transform="rotate(27.6 45.92 36.68)">コピス吉祥寺 A館</text>
+<text x="58.47" y="32.76" class="lbl cop" transform="rotate(27.6 58.47 32.76)">B館</text>
+<text x="17.27" y="28.44" class="lbl sub" transform="rotate(27.6 17.27 28.44)">東急百貨店</text>
+<text x="19.64" y="55.95" class="lbl sub" transform="rotate(27.6 19.64 55.95)">PARCO</text>
+<text x="41.41" y="59.40" class="lbl sub" transform="rotate(27.6 41.41 59.40)">ハーモニカ横丁</text>
+<text x="47.76" y="43.76" class="lbl" transform="rotate(27.4 47.76 43.76)">元町通り</text>
+<text x="35.31" y="49.13" class="lbl sub" transform="rotate(27.4 35.31 49.13)">ダイヤ街</text>
+<text x="64.74" y="40.63" class="lbl" transform="rotate(-62.5 64.74 40.63)">サンロード</text>
+<text x="62.16" y="60.85" class="lbl sub" transform="rotate(0.0 62.16 60.85)">バスターミナル</text>
+<text x="69.30" y="31.12" class="lbl sub" transform="rotate(27.6 69.30 31.12)">ペニーレーン</text>
+<g class="route">
+<path d="M56.80,70.55 L55.26,64.68 L52.58,58.78" class="seg" data-step="1"/>
+<path d="M52.58,58.78 L58.27,47.93" class="seg" data-step="2"/>
+<path d="M58.27,47.93 L50.48,43.91 L43.05,40.15 L38.07,37.57" class="seg" data-step="3" marker-end="url(#ar)"/>
+<path d="M38.07,37.57 L41.68,30.50" class="seg corridor" data-step="4"/>
+</g>
+<g class="exit"><rect x="53.20" y="70.15" width="7.2" height="3.1" rx="1.55"/><text x="56.80" y="71.75">北口</text></g>
+<text x="29.37" y="39.36" class="lbl ent" transform="rotate(0.0 29.37 39.36)">Zoff横の入口</text>
+<g class="gallery"><circle cx="41.68" cy="30.50" r="2.6" class="halo"/><circle cx="41.68" cy="30.50" r="1.3" class="dot"/><line x1="41.68" y1="29.10" x2="43.68" y2="24.10"/><text x="43.68" y="19.30" class="gname">PENNY LANE GALLERY</text><text x="43.68" y="22.40" class="gsub">コピス吉祥寺 A館 1階</text></g>
+<g id="me" hidden><circle r="3.2" class="me-halo"/><circle r="1.3" class="me-dot"/></g>
+<text x="99" y="95" class="credit">© OpenStreetMap contributors</text>
+</svg></figure>
+
+  <div class="tools">
+    <button class="primary" id="locate" type="button">現在地を表示</button>
+    <button id="all" type="button">ルート全体</button>
+    <a class="btn" id="gmaps" target="_blank" rel="noopener"
+       href="https://www.google.com/maps/dir/?api=1&amp;destination=35.704905,139.579160&amp;travelmode=walking">Googleマップで開く</a>
+  </div>
+  <p id="status" role="status" aria-live="polite"></p>
+
+  <ol class="steps" id="steps">
+    <li class="step" data-step="1" tabindex="0">
+      <span class="no latin">1</span>
+      <div><h2>JR・京王線 吉祥寺駅の北口を出る</h2>
+        <p>正面のバスターミナルに沿って、少し左手の「サンロード」入口へ。</p><span class="m" data-len="0"></span></div>
+    </li>
+    <li class="step" data-step="2" tabindex="0">
+      <span class="no latin">2</span>
+      <div><h2>サンロード（屋根のある商店街）に入る</h2>
+        <p>まっすぐ進み、最初の大きな通りとの交差点まで。</p><span class="m" data-len="1"></span></div>
+    </li>
+    <li class="step" data-step="3" tabindex="0">
+      <span class="no latin">3</span>
+      <div><h2>元町通りを左へ</h2>
+        <p>コピス吉祥寺の建物（右手）に沿って進み、Zoff（眼鏡屋）の横の入口へ。</p><span class="m" data-len="2"></span></div>
+    </li>
+    <li class="step" data-step="4" tabindex="0">
+      <span class="no latin">4</span>
+      <div><h2>入口から入り、廊下の奥</h2>
+        <p>突き当たりが PENNY LANE GALLERY です。</p><span class="m" data-len="3"></span></div>
+    </li>
+  </ol>
+
+  <p class="note">地図の入口とギャラリーの位置はおおよそです。現在地は端末の位置情報を使い、ページの外には送信しません。<br>
+    地図データ © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a></p>
+</div>
+
+<script>
+const GEO = {"P": {"lat0": 35.7042, "lon0": 139.57965, "rot": -4.0, "sc": 0.215, "w": 100.0, "h": 96.0}, "seg": [[[35.70328, 139.58008], [35.70352, 139.57998], [35.703758, 139.579821]], [[35.703758, 139.579821], [35.704227, 139.580074]], [[35.704227, 139.580074], [35.704372, 139.57966], [35.704507, 139.579265], [35.7046, 139.579]], [[35.7046, 139.579], [35.704905, 139.57916]]], "gal": [35.704905, 139.57916], "ent": [35.7046, 139.579], "seglen": [58, 57, 105, 37]};
+const map = document.getElementById('map');
+const steps = [...document.querySelectorAll('.step')];
+const segs = [...map.querySelectorAll('.seg')];
+const status = document.getElementById('status');
+
+// distances for each step
+document.querySelectorAll('.m').forEach(m => { const v = GEO.seglen[+m.dataset.len]; m.textContent = `約${v}m`; });
+
+function focusStep(n) {
+  map.classList.toggle('focus', n > 0);
+  segs.forEach(s => s.classList.toggle('on', +s.dataset.step === n));
+  steps.forEach(s => s.classList.toggle('on', +s.dataset.step === n));
+}
+steps.forEach(s => {
+  const go = () => focusStep(s.classList.contains('on') ? 0 : +s.dataset.step);
+  s.addEventListener('click', go);
+  s.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+});
+document.getElementById('all').addEventListener('click', () => focusStep(0));
+
+// same projection the map was drawn with (lat/lon -> SVG units)
+function project([lat, lon]) {
+  const { lat0, lon0, rot, sc, w, h } = GEO.P;
+  const k = Math.cos(lat0 * Math.PI / 180);
+  const x = (lon - lon0) * 111320 * k, y = (lat - lat0) * 111320, r = rot * Math.PI / 180;
+  return [w / 2 + (x * Math.cos(r) - y * Math.sin(r)) * sc, h / 2 - (x * Math.sin(r) + y * Math.cos(r)) * sc];
+}
+function metres(a, b) {
+  const R = 6371000, toR = Math.PI / 180;
+  const dLa = (b[0] - a[0]) * toR, dLo = (b[1] - a[1]) * toR;
+  const s = Math.sin(dLa / 2) ** 2 + Math.cos(a[0] * toR) * Math.cos(b[0] * toR) * Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+function nearestStep(p) {           // which route segment the visitor is closest to
+  let best = [Infinity, 1];
+  GEO.seg.forEach((pts, i) => pts.slice(0, -1).forEach((a, j) => {
+    const b = pts[j + 1];
+    for (let t = 0; t <= 1; t += 0.1) {
+      const q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+      const dd = metres(p, q); if (dd < best[0]) best = [dd, i + 1];
+    }
+  }));
+  return best;
+}
+
+let watch = null;
+document.getElementById('locate').addEventListener('click', () => {
+  if (!('geolocation' in navigator)) { status.textContent = 'この端末では現在地を取得できません。'; return; }
+  if (watch !== null) { navigator.geolocation.clearWatch(watch); watch = null; map.querySelector('#me').setAttribute('hidden', '');
+    steps.forEach(s => s.classList.remove('here')); status.textContent = ''; document.getElementById('locate').textContent = '現在地を表示'; return; }
+  status.textContent = '現在地を取得しています…';
+  document.getElementById('locate').textContent = '現在地を隠す';
+  watch = navigator.geolocation.watchPosition(pos => {
+    const p = [pos.coords.latitude, pos.coords.longitude];
+    const toGal = Math.round(metres(p, GEO.gal));
+    const [x, y] = project(p);
+    const me = map.querySelector('#me');
+    const inside = x > 0 && x < GEO.P.w && y > 0 && y < GEO.P.h;
+    if (inside) { me.removeAttribute('hidden'); me.setAttribute('transform', `translate(${x.toFixed(2)} ${y.toFixed(2)})`); }
+    else me.setAttribute('hidden', '');
+    if (toGal < 25) { status.textContent = 'ギャラリーのすぐ近くです。廊下の奥へどうぞ。'; focusStep(4); return; }
+    if (!inside) { status.textContent = `ギャラリーまで約${(toGal / 1000).toFixed(1)}km。吉祥寺駅北口に着いたら、もう一度地図をご覧ください。`; return; }
+    const [off, n] = nearestStep(p);
+    steps.forEach(s => s.classList.toggle('here', +s.dataset.step === n));
+    focusStep(n);
+    status.textContent = `ギャラリーまで約${toGal}m。今は手順${n}のあたりです` + (off > 60 ? '（ルートから少し離れています）' : '') + '。';
+  }, err => {
+    status.textContent = err.code === 1 ? '位置情報の利用が許可されませんでした。地図と手順を見ながらお越しください。' : '現在地を取得できませんでした。';
+    document.getElementById('locate').textContent = '現在地を表示'; watch = null;
+  }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
+});
+</script>
+</body>
+</html>
